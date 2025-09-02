@@ -65,6 +65,11 @@ logger.info("Local provider initialized")
 current_provider = Config.DEFAULT_PROVIDER if Config.DEFAULT_PROVIDER in providers else "local"
 token_counter = TokenCounter()
 
+# Хранилище для логов запросов и ответов
+request_logs = []
+response_logs = []
+MAX_LOGS = 100  # Максимальное количество хранимых логов
+
 class ChatMessage(BaseModel):
     role: str
     content: Union[str, List[Dict[str, Any]], Dict[str, Any]]  # Поддержка всех типов content
@@ -134,6 +139,34 @@ async def chat_completions(request: ChatCompletionRequest):
     logger.info(f"Messages count: {len(request.messages) if request.messages else 0}")
     logger.info(f"Stream: {request.stream}")
     logger.info(f"Current provider: {current_provider}")
+    
+    # Сохраняем запрос в лог
+    user_message = ""
+    if request.messages:
+        for msg in request.messages:
+            if msg.role == "user":
+                if isinstance(msg.content, str):
+                    user_message = msg.content
+                elif isinstance(msg.content, list):
+                    # Извлекаем текст из мультимодального контента
+                    for item in msg.content:
+                        if isinstance(item, dict) and item.get('type') == 'text':
+                            user_message = item.get('text', '')
+                            break
+                break
+    
+    request_log = {
+        "timestamp": time.time(),
+        "provider": current_provider,
+        "user_message": user_message[:500] + "..." if len(user_message) > 500 else user_message,
+        "messages_count": len(request.messages) if request.messages else 0,
+        "stream": request.stream
+    }
+    
+    global request_logs
+    request_logs.append(request_log)
+    if len(request_logs) > MAX_LOGS:
+        request_logs = request_logs[-MAX_LOGS:]
     
     try:
         provider = providers[current_provider]
@@ -305,6 +338,21 @@ async def chat_completions(request: ChatCompletionRequest):
                     except Exception as e:
                         logger.error(f"Final chunk JSON error: {e}")
                 
+                # Сохраняем финальный ответ в лог после завершения streaming
+                response_log = {
+                    "timestamp": time.time(),
+                    "provider": current_provider,
+                    "response": accumulated_content[:1000] + "..." if len(accumulated_content) > 1000 else accumulated_content,
+                    "input_tokens": input_tokens,
+                    "output_tokens": completion_tokens
+                }
+                
+                global response_logs
+                response_logs.append(response_log)
+                if len(response_logs) > MAX_LOGS:
+                    response_logs = response_logs[-MAX_LOGS:]
+                    logger.info(f"Saved streaming response to log: {accumulated_content[:100]}...")
+                
                 yield "data: [DONE]\n\n"
             
             return StreamingResponse(
@@ -341,6 +389,21 @@ async def chat_completions(request: ChatCompletionRequest):
         }
         
         logger.info(f"Response formatted successfully. Tokens: {input_tokens}+{output_tokens}")
+        
+        # Сохраняем ответ в лог
+        response_log = {
+            "timestamp": time.time(),
+            "provider": current_provider,
+            "response": output_text[:1000] + "..." if len(output_text) > 1000 else output_text,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens
+        }
+        
+        global response_logs
+        response_logs.append(response_log)
+        if len(response_logs) > MAX_LOGS:
+            response_logs = response_logs[-MAX_LOGS:]
+        
         return response_data
         
     except asyncio.TimeoutError:
@@ -388,6 +451,41 @@ async def debug_cline_request(request: Request):
         "raw_body": body_str,
         "method": request.method,
         "url": str(request.url)
+    }
+
+# Endpoints для получения логов
+@app.get("/logs/requests")
+async def get_request_logs():
+    """Получить логи запросов"""
+    return {"request_logs": request_logs}
+
+@app.get("/logs/responses")
+async def get_response_logs():
+    """Получить логи ответов"""
+    return {"response_logs": response_logs}
+
+@app.get("/logs/all")
+async def get_all_logs():
+    """Получить все логи (запросы + ответы)"""
+    # Объединяем и сортируем по времени
+    all_logs = []
+    for log in request_logs:
+        all_logs.append({"type": "request", **log})
+    for log in response_logs:
+        all_logs.append({"type": "response", **log})
+    
+    all_logs.sort(key=lambda x: x["timestamp"], reverse=True)
+    return {"logs": all_logs[:50]}  # Возвращаем последние 50
+
+# Endpoint для статистики (для совместимости с GUI)
+@app.get("/stats")
+async def get_stats():
+    """Получить статистику сервера"""
+    return {
+        "total_requests": len(request_logs),
+        "total_tokens": sum(log.get("input_tokens", 0) + log.get("output_tokens", 0) for log in response_logs),
+        "total_cost": 0.0,  # Пока не реализовано
+        "requests": []  # Для совместимости со старым GUI
     }
 
 # Добавляем обработчик для отлова ошибок валидации Pydantic
