@@ -6,3 +6,5 @@ proxy_llm/providers/__pycache__/
 proxy_llm/utils/__pycache__/
 
 proxy_llm/.env
+
+proxy_llm/logs/

@@ -3,6 +3,7 @@ from tkinter import ttk, scrolledtext
 import threading
 import requests
 import time
+import os
 from server import app
 import uvicorn
 from config import Config
@@ -18,6 +19,7 @@ class ProxyGUI:
         self.server_running = False
         self.server_process = None
         self.stop_server_flag = False
+        self.save_logs_to_file = tk.BooleanVar(value=Config.SAVE_LOGS_TO_FILE)
 
         # Создание виджетов
         self.create_widgets()
@@ -66,6 +68,10 @@ class ProxyGUI:
         # Фрейм для логов
         logs_frame = ttk.LabelFrame(self.root, text="Логи запросов и ответов")
         logs_frame.pack(pady=10, padx=10, fill="both", expand=True)
+
+        # Чекбокс для сохранения логов в файл
+        self.save_logs_checkbox = ttk.Checkbutton(logs_frame, text="Сохранять логи в файл", variable=self.save_logs_to_file)
+        self.save_logs_checkbox.pack(pady=5, padx=5, anchor="w")
 
         # Создаем notebook для вкладок
         self.notebook = ttk.Notebook(logs_frame)
@@ -282,19 +288,43 @@ uvicorn.run(app, host="{Config.SERVER_HOST}", port={Config.SERVER_PORT})
         """Обновление всех логов в GUI потоке"""
         self.all_logs_text.config(state=tk.NORMAL)
         self.all_logs_text.delete(1.0, tk.END)
-        
+
+        log_content = ""
         for log in logs:  # Уже отсортированы по времени
             timestamp = time.strftime("%H:%M:%S", time.localtime(log['timestamp']))
             if log['type'] == 'request':
-                self.all_logs_text.insert(tk.END, f"[{timestamp}] ЗАПРОС {log['provider']}:\n")
-                self.all_logs_text.insert(tk.END, f"📤 {log['user_message']}\n")
+                line = f"[{timestamp}] ЗАПРОС {log['provider']}:\n📤 {log['user_message']}\n"
+                self.all_logs_text.insert(tk.END, line)
+                log_content += line
             else:
-                self.all_logs_text.insert(tk.END, f"[{timestamp}] ОТВЕТ {log['provider']}:\n")
-                self.all_logs_text.insert(tk.END, f"📥 {log['response']}\n")
-                self.all_logs_text.insert(tk.END, f"Токены: {log['input_tokens']}+{log['output_tokens']}\n")
-            self.all_logs_text.insert(tk.END, "-" * 50 + "\n")
-        
+                line = f"[{timestamp}] ОТВЕТ {log['provider']}:\n📥 {log['response']}\nТокены: {log['input_tokens']}+{log['output_tokens']}\n"
+                self.all_logs_text.insert(tk.END, line)
+                log_content += line
+            separator = "-" * 50 + "\n"
+            self.all_logs_text.insert(tk.END, separator)
+            log_content += separator
+
         self.all_logs_text.config(state=tk.DISABLED)
+
+        # Сохранение в файл, если чекбокс активен
+        if self.save_logs_to_file.get():
+            try:
+                os.makedirs(os.path.dirname(Config.LOG_FILE_PATH), exist_ok=True)
+
+                # Проверяем размер файла
+                if os.path.exists(Config.LOG_FILE_PATH):
+                    file_size = os.path.getsize(Config.LOG_FILE_PATH)
+                    if file_size > Config.LOG_MAX_SIZE:
+                        # Очищаем файл, если он превышает лимит
+                        with open(Config.LOG_FILE_PATH, 'w', encoding='utf-8') as f:
+                            f.write("")
+                        print(f"Файл логов очищен (превышен размер {Config.LOG_MAX_SIZE} байт)")
+
+                # Добавляем новые логи в конец файла
+                with open(Config.LOG_FILE_PATH, 'a', encoding='utf-8') as f:
+                    f.write(log_content)
+            except Exception as e:
+                print(f"Ошибка сохранения логов в файл: {e}")
 
     def on_closing(self):
         """Обработчик закрытия окна"""

@@ -13,11 +13,14 @@ class Config:
     DEFAULT_PROVIDER = os.getenv("DEFAULT_PROVIDER", "local")
     SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
     SERVER_PORT = int(os.getenv("SERVER_PORT", 8000))
+    LOG_FILE_PATH = os.getenv("LOG_FILE_PATH", "logs/proxy_logs.txt")
+    LOG_MAX_SIZE = int(os.getenv("LOG_MAX_SIZE", 10485760))
+    SAVE_LOGS_TO_FILE = os.getenv("SAVE_LOGS_TO_FILE", "false").lower() == "true"
 
     # Цены
     PRICES = {
         "deepseek": {
-            "input_cache_hit": 0.07 / 1_000_000,  # per token
+            "input_cache_hit": 0.07 / 1_000_000,
             "input_cache_miss": 0.56 / 1_000_000,
             "output": 1.68 / 1_000_000
         },

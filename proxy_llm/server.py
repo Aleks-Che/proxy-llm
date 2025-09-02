@@ -489,8 +489,8 @@ async def get_all_logs():
     for log in response_logs:
         all_logs.append({"type": "response", **log})
     
-    all_logs.sort(key=lambda x: x["timestamp"], reverse=True)
-    return {"logs": all_logs[:50]}  # Возвращаем последние 50
+    all_logs.sort(key=lambda x: x["timestamp"])  # reverse=False по умолчанию
+    return {"logs": all_logs[-50:]}  # Возвращаем последние 50 (новые)
 
 # Endpoint для статистики (для совместимости с GUI)
 @app.get("/stats")
