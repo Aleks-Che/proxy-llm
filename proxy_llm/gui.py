@@ -16,6 +16,8 @@ class ProxyGUI:
         # Переменные
         self.current_provider = tk.StringVar(value=Config.DEFAULT_PROVIDER)
         self.server_running = False
+        self.server_process = None
+        self.stop_server_flag = False
 
         # Создание виджетов
         self.create_widgets()
@@ -27,6 +29,9 @@ class ProxyGUI:
         self.stop_log_updates = False
         self.log_update_thread = None
 
+        # Обработчик закрытия окна
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
     def create_widgets(self):
         # Фрейм для выбора провайдера
         provider_frame = ttk.LabelFrame(self.root, text="Выбор провайдера")
@@ -37,9 +42,13 @@ class ProxyGUI:
         provider_combo.grid(row=0, column=1, padx=5, pady=5)
         provider_combo.bind("<<ComboboxSelected>>", self.change_provider)
 
-        # Кнопка запуска сервера
-        self.start_button = ttk.Button(provider_frame, text="Запустить сервер", command=self.start_server)
+        # Кнопка запуска/остановки сервера с иконкой
+        self.start_button = ttk.Button(provider_frame, text="▶ Запустить", command=self.toggle_server, width=15)
         self.start_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Лейбл для отображения порта
+        self.port_label = ttk.Label(provider_frame, text=f"Порт: {Config.SERVER_PORT}")
+        self.port_label.grid(row=0, column=3, padx=5, pady=5)
 
         # Фрейм для статистики
         stats_frame = ttk.LabelFrame(self.root, text="Статистика")
@@ -89,7 +98,7 @@ class ProxyGUI:
     def change_provider(self, event):
         provider = self.current_provider.get()
         try:
-            response = requests.post("http://localhost:8000/set_provider", json=provider)
+            response = requests.post(f"http://localhost:{Config.SERVER_PORT}/switch-provider/{provider}")
             if response.status_code == 200:
                 print(f"Провайдер изменен на {provider}")
             else:
@@ -97,19 +106,76 @@ class ProxyGUI:
         except:
             print("Сервер не запущен")
 
+    def toggle_server(self):
+        if self.server_running:
+            self.stop_server()
+        else:
+            self.start_server()
+
     def start_server(self):
         if not self.server_running:
             self.server_running = True
-            self.start_button.config(text="Сервер запущен", state="disabled")
+            self.stop_server_flag = False
+            self.start_button.config(text="⏹ Остановить", state="normal")
             threading.Thread(target=self.run_server, daemon=True).start()
 
+    def stop_server(self):
+        if self.server_running:
+            self.server_running = False
+            self.stop_server_flag = True
+            self.start_button.config(text="▶ Запустить", state="normal")
+
+            # Останавливаем процесс
+            if self.server_process and self.server_process.poll() is None:
+                try:
+                    self.server_process.terminate()
+                    self.server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.server_process.kill()
+                except Exception as e:
+                    print(f"Ошибка при остановке сервера: {e}")
+
     def run_server(self):
-        uvicorn.run(app, host=Config.SERVER_HOST, port=Config.SERVER_PORT)
+        import subprocess
+        import sys
+        import os
+
+        try:
+            # Запускаем сервер в отдельном процессе
+            cmd = [sys.executable, "-c", f"""
+import sys
+sys.path.insert(0, r"{os.getcwd()}")
+import uvicorn
+from server import app
+from config import Config
+uvicorn.run(app, host="{Config.SERVER_HOST}", port={Config.SERVER_PORT})
+"""]
+
+            self.server_process = subprocess.Popen(cmd, cwd=os.getcwd())
+
+            # Ждем пока процесс работает
+            while not self.stop_server_flag and self.server_process.poll() is None:
+                import time
+                time.sleep(0.1)
+
+            # Останавливаем процесс если он еще работает
+            if self.server_process and self.server_process.poll() is None:
+                self.server_process.terminate()
+                try:
+                    self.server_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.server_process.kill()
+
+        except Exception as e:
+            if not self.stop_server_flag:
+                print(f"Ошибка запуска сервера: {e}")
+            self.server_running = False
+            self.root.after(0, lambda: self.start_button.config(text="▶ Запустить", state="normal"))
 
     def update_stats(self):
-        if self.server_running:
+        if self.server_running and self.server_process and self.server_process.poll() is None:
             try:
-                response = requests.get("http://localhost:10002/stats")
+                response = requests.get(f"http://localhost:{Config.SERVER_PORT}/stats", timeout=2)
                 if response.status_code == 200:
                     data = response.json()
                     self.total_requests_label.config(text=f"Всего запросов: {data['total_requests']}")
@@ -117,6 +183,10 @@ class ProxyGUI:
                     self.total_cost_label.config(text=f"Общая стоимость: ${data['total_cost']:.4f}")
             except:
                 pass
+        else:
+            # Если сервер не запущен или процесс умер, сбрасываем состояние
+            if self.server_running:
+                self.stop_server()
 
         # Запускаем обновление логов в отдельном потоке, если не запущено
         if self.server_running and (self.log_update_thread is None or not self.log_update_thread.is_alive()):
@@ -156,7 +226,7 @@ class ProxyGUI:
             
         try:
             # Получаем логи запросов
-            response = requests.get("http://localhost:10002/logs/requests", timeout=2)
+            response = requests.get(f"http://localhost:{Config.SERVER_PORT}/logs/requests", timeout=2)
             if response.status_code == 200:
                 data = response.json()
                 print(f"Получено запросов: {len(data['request_logs'])}")
@@ -164,14 +234,14 @@ class ProxyGUI:
                 self.root.after(0, lambda: self.update_requests_text(data['request_logs']))
 
             # Получаем логи ответов
-            response = requests.get("http://localhost:10002/logs/responses", timeout=2)
+            response = requests.get(f"http://localhost:{Config.SERVER_PORT}/logs/responses", timeout=2)
             if response.status_code == 200:
                 data = response.json()
                 print(f"Получено ответов: {len(data['response_logs'])}")
                 self.root.after(0, lambda: self.update_responses_text(data['response_logs']))
 
             # Получаем все логи
-            response = requests.get("http://localhost:10002/logs/all", timeout=2)
+            response = requests.get(f"http://localhost:{Config.SERVER_PORT}/logs/all", timeout=2)
             if response.status_code == 200:
                 data = response.json()
                 print(f"Всего логов: {len(data['logs'])}")
@@ -225,6 +295,20 @@ class ProxyGUI:
             self.all_logs_text.insert(tk.END, "-" * 50 + "\n")
         
         self.all_logs_text.config(state=tk.DISABLED)
+
+    def on_closing(self):
+        """Обработчик закрытия окна"""
+        # Останавливаем сервер если он запущен
+        if self.server_running:
+            self.stop_server()
+
+        # Останавливаем обновление логов
+        self.stop_log_updates = True
+        if hasattr(self, 'log_update_thread') and self.log_update_thread and self.log_update_thread.is_alive():
+            self.log_update_thread.join(timeout=2.0)
+
+        # Закрываем окно
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
