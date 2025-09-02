@@ -1,4 +1,5 @@
 import tiktoken
+from config import Config
 
 class TokenCounter:
     def __init__(self):
@@ -12,17 +13,18 @@ class TokenCounter:
         return len(encoding.encode(text))
 
     def estimate_cost(self, input_tokens, output_tokens, provider, cache_hit=True):
-        prices = {
-            "deepseek": {
-                "input": 0.07 if cache_hit else 0.56,  # per 1M tokens
-                "output": 1.68
-            },
-            "moonshot": {
-                "input": 0.15 if cache_hit else 0.60,
-                "output": 2.50
-            }
-        }
-        price_data = prices.get(provider, prices["deepseek"])
-        input_cost = (input_tokens / 1_000_000) * price_data["input"]
-        output_cost = (output_tokens / 1_000_000) * price_data["output"]
+        """Расчет стоимости на основе провайдера и типов токенов"""
+        if provider not in Config.PRICES:
+            return 0.0  # Для local провайдера стоимость не рассчитывается
+
+        prices = Config.PRICES[provider]
+
+        # Определяем тип input токенов
+        input_price = prices["input_cache_hit"] if cache_hit else prices["input_cache_miss"]
+        output_price = prices["output"]
+
+        # Расчет стоимости (цены уже даны за токен)
+        input_cost = input_tokens * input_price
+        output_cost = output_tokens * output_price
+
         return input_cost + output_cost

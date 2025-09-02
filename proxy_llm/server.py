@@ -70,6 +70,9 @@ request_logs = []
 response_logs = []
 MAX_LOGS = 100  # Максимальное количество хранимых логов
 
+# Глобальная статистика стоимости
+total_cost = 0.0
+
 class ChatMessage(BaseModel):
     role: str
     content: Union[str, List[Dict[str, Any]], Dict[str, Any]]  # Поддержка всех типов content
@@ -338,15 +341,21 @@ async def chat_completions(request: ChatCompletionRequest):
                     except Exception as e:
                         logger.error(f"Final chunk JSON error: {e}")
                 
+                # Расчет стоимости для streaming запроса
+                request_cost = token_counter.estimate_cost(input_tokens, completion_tokens, current_provider)
+                global total_cost
+                total_cost += request_cost
+
                 # Сохраняем финальный ответ в лог после завершения streaming
                 response_log = {
                     "timestamp": time.time(),
                     "provider": current_provider,
                     "response": accumulated_content[:1000] + "..." if len(accumulated_content) > 1000 else accumulated_content,
                     "input_tokens": input_tokens,
-                    "output_tokens": completion_tokens
+                    "output_tokens": completion_tokens,
+                    "cost": request_cost
                 }
-                
+
                 global response_logs
                 response_logs.append(response_log)
                 if len(response_logs) > MAX_LOGS:
@@ -366,7 +375,12 @@ async def chat_completions(request: ChatCompletionRequest):
         # Подсчет токенов
         input_tokens = token_counter.count_tokens(str(messages), current_provider)
         output_tokens = token_counter.count_tokens(output_text, current_provider)
-        
+
+        # Расчет стоимости для платных провайдеров
+        request_cost = token_counter.estimate_cost(input_tokens, output_tokens, current_provider)
+        global total_cost
+        total_cost += request_cost
+
         # Формирование ответа в формате OpenAI API
         response_data = {
             "id": f"chatcmpl-{int(time.time())}",
@@ -396,9 +410,10 @@ async def chat_completions(request: ChatCompletionRequest):
             "provider": current_provider,
             "response": output_text[:1000] + "..." if len(output_text) > 1000 else output_text,
             "input_tokens": input_tokens,
-            "output_tokens": output_tokens
+            "output_tokens": output_tokens,
+            "cost": request_cost
         }
-        
+
         global response_logs
         response_logs.append(response_log)
         if len(response_logs) > MAX_LOGS:
@@ -481,10 +496,11 @@ async def get_all_logs():
 @app.get("/stats")
 async def get_stats():
     """Получить статистику сервера"""
+    global total_cost
     return {
         "total_requests": len(request_logs),
         "total_tokens": sum(log.get("input_tokens", 0) + log.get("output_tokens", 0) for log in response_logs),
-        "total_cost": 0.0,  # Пока не реализовано
+        "total_cost": total_cost,
         "requests": []  # Для совместимости со старым GUI
     }
 

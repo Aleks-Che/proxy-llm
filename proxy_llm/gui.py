@@ -180,7 +180,7 @@ uvicorn.run(app, host="{Config.SERVER_HOST}", port={Config.SERVER_PORT})
                     data = response.json()
                     self.total_requests_label.config(text=f"Всего запросов: {data['total_requests']}")
                     self.total_tokens_label.config(text=f"Всего токенов: {data['total_tokens']}")
-                    self.total_cost_label.config(text=f"Общая стоимость: ${data['total_cost']:.4f}")
+                    self.total_cost_label.config(text=f"Общая стоимость: ${data['total_cost']:.6f}")
             except:
                 pass
         else:
