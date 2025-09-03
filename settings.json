@@ -203,5 +203,5 @@
     "file_path": "logs/proxy_logs.txt",
     "max_size": 10485760
   },
-  "language": "ru"
+  "language": "en"
 }
