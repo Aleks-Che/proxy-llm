@@ -1,6 +1,6 @@
 # LLM Proxy Server
 
-A Python application for proxying requests to various LLM APIs (Anthropic, DeepSeek, Moonshot, OpenRouter, xAI) with an OpenAI-compatible interface. Supports GUI interface, usage statistics, logging, and localizations in 10 languages.
+A Python application for proxying requests from VS Code extensions, such as Cline, Roo-Code, to various LLMs via API (Anthropic, DeepSeek, Moonshot, OpenRouter, xAI) with an OpenAI-compatible interface. Supports a GUI interface, usage statistics, logging, and localizations in 10 languages.
 
 ## Application Architecture
 
