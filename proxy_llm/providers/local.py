@@ -1,5 +1,5 @@
 from openai import AsyncOpenAI
-from config import Config
+from config import config as Config
 
 class LocalProvider:
     def __init__(self):

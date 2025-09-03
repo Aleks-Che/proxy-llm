@@ -1,5 +1,5 @@
 import tiktoken
-from config import Config
+from config import config as Config
 
 class TokenCounter:
     def __init__(self):

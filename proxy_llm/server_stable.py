@@ -11,7 +11,7 @@ from providers.deepseek import DeepSeekProvider
 from providers.moonshot import MoonshotProvider
 from providers.local import LocalProvider
 from utils.token_counter import TokenCounter
-from config import Config
+from config import config as Config
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)

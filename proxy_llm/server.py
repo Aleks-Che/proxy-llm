@@ -10,7 +10,7 @@ from providers.deepseek import DeepSeekProvider
 from providers.moonshot import MoonshotProvider
 from providers.local import LocalProvider
 from utils.token_counter import TokenCounter
-from config import Config
+from config import config as Config
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -51,18 +51,34 @@ app.add_middleware(
 
 # Провайдеры
 providers = {}
-if Config.DEEPSEEK_API_KEY and Config.DEEPSEEK_API_KEY != "sk-ваш-ключ-здесь":
-    providers["deepseek"] = DeepSeekProvider()
-    logger.info("DeepSeek provider initialized")
-if Config.MOONSHOT_API_KEY:
-    providers["moonshot"] = MoonshotProvider()
-    logger.info("Moonshot provider initialized")
+provider_configs = Config.get_providers()
 
-# Всегда добавляем локальный провайдер
-providers["local"] = LocalProvider()
-logger.info("Local provider initialized")
+for provider_name, provider_config in provider_configs.items():
+    if provider_config.get("enabled", False):
+        api_key = provider_config.get("api_key", "")
+        if provider_name == "deepseek" and api_key:
+            providers["deepseek"] = DeepSeekProvider()
+            logger.info("DeepSeek provider initialized")
+        elif provider_name == "moonshot" and api_key:
+            providers["moonshot"] = MoonshotProvider()
+            logger.info("Moonshot provider initialized")
+        elif provider_name == "local":
+            providers["local"] = LocalProvider()
+            logger.info("Local provider initialized")
+        elif provider_name == "xai" and api_key:
+            from providers.xai import XAIProvider
+            providers["xai"] = XAIProvider()
+            logger.info("xAI provider initialized")
+        elif provider_name == "openrouter" and api_key:
+            from providers.openrouter import OpenRouterProvider
+            providers["openrouter"] = OpenRouterProvider()
+            logger.info("OpenRouter provider initialized")
+        elif provider_name == "anthropic" and api_key:
+            from providers.anthropic import AnthropicProvider
+            providers["anthropic"] = AnthropicProvider()
+            logger.info("Anthropic provider initialized")
 
-current_provider = Config.DEFAULT_PROVIDER if Config.DEFAULT_PROVIDER in providers else "local"
+current_provider = Config.get_default_provider() if Config.get_default_provider() in providers else "local"
 token_counter = TokenCounter()
 
 # Хранилище для логов запросов и ответов

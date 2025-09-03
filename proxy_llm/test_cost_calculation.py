@@ -4,7 +4,7 @@
 """
 
 from utils.token_counter import TokenCounter
-from config import Config
+from config import config as Config
 
 def test_cost_calculation():
     """Тестирование расчета стоимости"""
