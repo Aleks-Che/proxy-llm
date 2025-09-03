@@ -1,0 +1,207 @@
+{
+  "providers": {
+    "deepseek": {
+      "name": "DeepSeek",
+      "api_key": "",
+      "models": [
+        {
+          "name": "deepseek-chat",
+          "context_window": 128000,
+          "pricing": {
+            "input_cache_hit": 0.07,
+            "input_cache_miss": 0.56,
+            "output": 1.68
+          }
+        }
+      ],
+      "base_url": "https://api.deepseek.com",
+      "enabled": true
+    },
+    "moonshot": {
+      "name": "Moonshot AI",
+      "api_key": "",
+      "models": [
+        {
+          "name": "kimi-k2-0711-preview",
+          "context_window": 128000,
+          "pricing": {
+            "input_cache_hit": 0.15,
+            "input_cache_miss": 0.6,
+            "output": 2.5
+          }
+        }
+      ],
+      "base_url": "https://api.moonshot.cn/v1",
+      "enabled": true
+    },
+    "xai": {
+      "name": "xAI (Grok)",
+      "api_key": "",
+      "models": [
+        {
+          "name": "grok-code-fast-1",
+          "context_window": 256000,
+          "pricing": {
+            "input_cache_hit": 0.2,
+            "input_cache_miss": 0.2,
+            "output": 1.5
+          }
+        },
+        {
+          "name": "grok-4-0709",
+          "context_window": 256000,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
+          }
+        },
+        {
+          "name": "grok-3",
+          "context_window": 131072,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
+          }
+        },
+        {
+          "name": "grok-3-mini",
+          "context_window": 131072,
+          "pricing": {
+            "input_cache_hit": 0.3,
+            "input_cache_miss": 0.3,
+            "output": 0.5
+          }
+        }
+      ],
+      "base_url": "https://api.x.ai/v1",
+      "enabled": true
+    },
+    "openrouter": {
+      "name": "OpenRouter",
+      "api_key": "",
+      "models": [
+        {
+          "name": "openai/gpt-4o",
+          "context_window": 128000,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        }
+      ],
+      "base_url": "https://openrouter.ai/api/v1",
+      "enabled": true
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "api_key": "",
+      "models": [
+        {
+          "name": "claude-opus-4-1-20250805",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 15.0,
+            "input_cache_miss": 15.0,
+            "output": 75.0
+          }
+        },
+        {
+          "name": "claude-opus-4",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 15.0,
+            "input_cache_miss": 15.0,
+            "output": 75.0
+          }
+        },
+        {
+          "name": "claude-sonnet-4",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
+          }
+        },
+        {
+          "name": "claude-sonnet-3.7",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
+          }
+        },
+        {
+          "name": "claude-sonnet-3.5",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
+          }
+        },
+        {
+          "name": "claude-haiku-3.5",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 0.8,
+            "input_cache_miss": 0.8,
+            "output": 4.0
+          }
+        },
+        {
+          "name": "claude-opus-3",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 15.0,
+            "input_cache_miss": 15.0,
+            "output": 75.0
+          }
+        },
+        {
+          "name": "claude-haiku-3",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 0.25,
+            "input_cache_miss": 0.25,
+            "output": 1.25
+          }
+        }
+      ],
+      "base_url": "https://api.anthropic.com/v1",
+      "enabled": true
+    },
+    "local": {
+      "name": "Local Model",
+      "api_key": "",
+      "models": [
+        {
+          "name": "gpt-oss-120b",
+          "context_window": 4096,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        }
+      ],
+      "base_url": "http://localhost:10003/v1",
+      "enabled": true
+    }
+  },
+  "default_provider": "deepseek",
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000
+  },
+  "logging": {
+    "save_to_file": true,
+    "file_path": "logs/proxy_logs.txt",
+    "max_size": 10485760
+  },
+  "language": "ru"
+}

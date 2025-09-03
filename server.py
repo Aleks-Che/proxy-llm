@@ -10,7 +10,7 @@ from providers.deepseek import DeepSeekProvider
 from providers.moonshot import MoonshotProvider
 from providers.local import LocalProvider
 from utils.token_counter import TokenCounter
-from config import Config
+from config import config as Config
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -51,24 +51,43 @@ app.add_middleware(
 
 # Провайдеры
 providers = {}
-if Config.DEEPSEEK_API_KEY and Config.DEEPSEEK_API_KEY != "sk-ваш-ключ-здесь":
-    providers["deepseek"] = DeepSeekProvider()
-    logger.info("DeepSeek provider initialized")
-if Config.MOONSHOT_API_KEY:
-    providers["moonshot"] = MoonshotProvider()
-    logger.info("Moonshot provider initialized")
+provider_configs = Config.get_providers()
 
-# Всегда добавляем локальный провайдер
-providers["local"] = LocalProvider()
-logger.info("Local provider initialized")
+for provider_name, provider_config in provider_configs.items():
+    if provider_config.get("enabled", False):
+        api_key = provider_config.get("api_key", "")
+        if provider_name == "deepseek" and api_key:
+            providers["deepseek"] = DeepSeekProvider()
+            logger.info("DeepSeek provider initialized")
+        elif provider_name == "moonshot" and api_key:
+            providers["moonshot"] = MoonshotProvider()
+            logger.info("Moonshot provider initialized")
+        elif provider_name == "local":
+            providers["local"] = LocalProvider()
+            logger.info("Local provider initialized")
+        elif provider_name == "xai" and api_key:
+            from providers.xai import XAIProvider
+            providers["xai"] = XAIProvider()
+            logger.info("xAI provider initialized")
+        elif provider_name == "openrouter" and api_key:
+            from providers.openrouter import OpenRouterProvider
+            providers["openrouter"] = OpenRouterProvider()
+            logger.info("OpenRouter provider initialized")
+        elif provider_name == "anthropic" and api_key:
+            from providers.anthropic import AnthropicProvider
+            providers["anthropic"] = AnthropicProvider()
+            logger.info("Anthropic provider initialized")
 
-current_provider = Config.DEFAULT_PROVIDER if Config.DEFAULT_PROVIDER in providers else "local"
+current_provider = Config.get_default_provider() if Config.get_default_provider() in providers else "local"
 token_counter = TokenCounter()
 
 # Хранилище для логов запросов и ответов
 request_logs = []
 response_logs = []
 MAX_LOGS = 100  # Максимальное количество хранимых логов
+
+# Глобальная статистика стоимости
+total_cost = 0.0
 
 class ChatMessage(BaseModel):
     role: str
@@ -338,15 +357,21 @@ async def chat_completions(request: ChatCompletionRequest):
                     except Exception as e:
                         logger.error(f"Final chunk JSON error: {e}")
                 
+                # Расчет стоимости для streaming запроса
+                request_cost = token_counter.estimate_cost(input_tokens, completion_tokens, current_provider)
+                global total_cost
+                total_cost += request_cost
+
                 # Сохраняем финальный ответ в лог после завершения streaming
                 response_log = {
                     "timestamp": time.time(),
                     "provider": current_provider,
                     "response": accumulated_content[:1000] + "..." if len(accumulated_content) > 1000 else accumulated_content,
                     "input_tokens": input_tokens,
-                    "output_tokens": completion_tokens
+                    "output_tokens": completion_tokens,
+                    "cost": request_cost
                 }
-                
+
                 global response_logs
                 response_logs.append(response_log)
                 if len(response_logs) > MAX_LOGS:
@@ -366,7 +391,12 @@ async def chat_completions(request: ChatCompletionRequest):
         # Подсчет токенов
         input_tokens = token_counter.count_tokens(str(messages), current_provider)
         output_tokens = token_counter.count_tokens(output_text, current_provider)
-        
+
+        # Расчет стоимости для платных провайдеров
+        request_cost = token_counter.estimate_cost(input_tokens, output_tokens, current_provider)
+        global total_cost
+        total_cost += request_cost
+
         # Формирование ответа в формате OpenAI API
         response_data = {
             "id": f"chatcmpl-{int(time.time())}",
@@ -396,9 +426,10 @@ async def chat_completions(request: ChatCompletionRequest):
             "provider": current_provider,
             "response": output_text[:1000] + "..." if len(output_text) > 1000 else output_text,
             "input_tokens": input_tokens,
-            "output_tokens": output_tokens
+            "output_tokens": output_tokens,
+            "cost": request_cost
         }
-        
+
         global response_logs
         response_logs.append(response_log)
         if len(response_logs) > MAX_LOGS:
@@ -474,17 +505,18 @@ async def get_all_logs():
     for log in response_logs:
         all_logs.append({"type": "response", **log})
     
-    all_logs.sort(key=lambda x: x["timestamp"], reverse=True)
-    return {"logs": all_logs[:50]}  # Возвращаем последние 50
+    all_logs.sort(key=lambda x: x["timestamp"])  # reverse=False по умолчанию
+    return {"logs": all_logs[-50:]}  # Возвращаем последние 50 (новые)
 
 # Endpoint для статистики (для совместимости с GUI)
 @app.get("/stats")
 async def get_stats():
     """Получить статистику сервера"""
+    global total_cost
     return {
         "total_requests": len(request_logs),
         "total_tokens": sum(log.get("input_tokens", 0) + log.get("output_tokens", 0) for log in response_logs),
-        "total_cost": 0.0,  # Пока не реализовано
+        "total_cost": total_cost,
         "requests": []  # Для совместимости со старым GUI
     }
 

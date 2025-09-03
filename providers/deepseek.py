@@ -1,6 +1,6 @@
 from openai import AsyncOpenAI
 import asyncio
-from config import Config
+from config import config as Config
 
 class DeepSeekProvider:
     def __init__(self):

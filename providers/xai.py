@@ -1,17 +1,22 @@
 from openai import AsyncOpenAI
 import asyncio
-from config import Config
+from config import config as Config
 
-class MoonshotProvider:
+class XAIProvider:
     def __init__(self):
+        provider_config = Config.get_provider_config("xai")
+        self.api_key = provider_config.get("api_key", "")
+        self.base_url = provider_config.get("base_url", "https://api.x.ai/v1")
         self.client = AsyncOpenAI(
-            api_key=Config.MOONSHOT_API_KEY,
-            base_url="https://api.moonshot.ai/v1"
+            api_key=self.api_key,
+            base_url=self.base_url
         )
-        self.model = Config.MOONSHOT_MODEL
+        # Получаем первую модель из настроек
+        models = provider_config.get("models", [])
+        self.model = models[0]["name"] if models else "grok-4"
 
     async def chat_completion(self, messages, **kwargs):
-        # Filter out unsupported parameters for Moonshot
+        # Filter out unsupported parameters for xAI
         supported_params = ['temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop']
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
 
