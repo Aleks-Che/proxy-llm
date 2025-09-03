@@ -127,6 +127,9 @@ class ProxyGUI:
         self.stop_log_updates = False
         self.log_update_thread = None
 
+        # Флаг для отслеживания открытого окна настроек
+        self.settings_window_open = False
+
         # Обработчик закрытия окна
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -559,6 +562,9 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
 
     def open_settings(self):
         """Открытие окна настроек"""
+        if self.settings_window_open:
+            return  # Если окно уже открыто, не открываем новое
+
         # Получаем текущий язык для переводов
         current_lang = self.current_language.get()
         trans = self.translations[current_lang]
@@ -566,6 +572,16 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         settings_window = tk.Toplevel(self.root)
         settings_window.title(trans['settings_window_title'])
         settings_window.geometry("700x500")
+
+        # Делаем окно модальным
+        settings_window.grab_set()
+        settings_window.focus_set()
+
+        # Устанавливаем флаг
+        self.settings_window_open = True
+
+        # Обработчик закрытия окна
+        settings_window.protocol("WM_DELETE_WINDOW", lambda: self.on_settings_close(settings_window))
 
         # Создаем notebook для вкладок настроек
         notebook = ttk.Notebook(settings_window)
@@ -587,7 +603,7 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         button_frame = ttk.Frame(settings_window)
         button_frame.pack(fill="x", padx=10, pady=5)
 
-        ttk.Button(button_frame, text=trans['cancel_button'], command=settings_window.destroy).pack(side="left", padx=5)
+        ttk.Button(button_frame, text=trans['cancel_button'], command=lambda: self.on_settings_close(settings_window)).pack(side="left", padx=5)
         ttk.Button(button_frame, text=trans['save_button'], command=lambda: self.save_settings(settings_window)).pack(side="right", padx=5)
 
     def create_providers_tab(self, parent, trans):
@@ -717,12 +733,18 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
             Config._settings["language"] = self.settings_lang_var.get()
 
         Config.save_settings()
+        self.settings_window_open = False
         window.destroy()
         print("Настройки сохранены")
 
         # Обновляем GUI
         self.update_available_providers()
         self.update_models_list()
+
+    def on_settings_close(self, window):
+        """Обработчик закрытия окна настроек"""
+        self.settings_window_open = False
+        window.destroy()
 
     def update_models_list(self):
         """Обновление списка моделей для текущего провайдера"""
