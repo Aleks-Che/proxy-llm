@@ -196,7 +196,7 @@
   "default_provider": "deepseek",
   "server": {
     "host": "0.0.0.0",
-    "port": 10002
+    "port": 8000
   },
   "logging": {
     "save_to_file": true,
