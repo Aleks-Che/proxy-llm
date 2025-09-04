@@ -13,7 +13,7 @@ class XAIProvider:
         )
         # Получаем первую модель из настроек
         models = provider_config.get("models", [])
-        self.model = models[0]["name"] if models else "grok-4"
+        self.model = models[0].get("name", "grok-4") if models else "grok-4"
 
     async def chat_completion(self, messages, **kwargs):
         # Filter out unsupported parameters for xAI

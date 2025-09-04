@@ -13,7 +13,7 @@ class AnthropicProvider:
         )
         # Получаем первую модель из настроек
         models = provider_config.get("models", [])
-        self.model = models[0]["name"] if models else "claude-opus-4-1-20250805"
+        self.model = models[0].get("name", "claude-opus-4-1-20250805") if models else "claude-opus-4-1-20250805"
 
     async def chat_completion(self, messages, **kwargs):
         # Filter out unsupported parameters for Anthropic

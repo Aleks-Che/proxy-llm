@@ -1,10 +1,11 @@
 {
   "providers": {
     "deepseek": {
-      "name": "DeepSeek",
+      "name": "DeepSeek1",
       "api_key": "",
       "models": [
         {
+          "id": "deepseek-1",
           "name": "deepseek-chat",
           "context_window": 128000,
           "pricing": {
@@ -15,13 +16,15 @@
         }
       ],
       "base_url": "https://api.deepseek.com",
-      "enabled": true
+      "enabled": true,
+      "default_model": "deepseek-1"
     },
     "moonshot": {
       "name": "Moonshot AI",
       "api_key": "",
       "models": [
         {
+          "id": "moonshot-0",
           "name": "kimi-k2-0711-preview",
           "context_window": 128000,
           "pricing": {
@@ -32,13 +35,15 @@
         }
       ],
       "base_url": "https://api.moonshot.cn/v1",
-      "enabled": true
+      "enabled": true,
+      "default_model": "moonshot-0"
     },
     "xai": {
       "name": "xAI (Grok)",
       "api_key": "",
       "models": [
         {
+          "id": "xai-0",
           "name": "grok-code-fast-1",
           "context_window": 256000,
           "pricing": {
@@ -48,6 +53,7 @@
           }
         },
         {
+          "id": "xai-1",
           "name": "grok-4-0709",
           "context_window": 256000,
           "pricing": {
@@ -57,6 +63,7 @@
           }
         },
         {
+          "id": "xai-2",
           "name": "grok-3",
           "context_window": 131072,
           "pricing": {
@@ -66,6 +73,7 @@
           }
         },
         {
+          "id": "xai-3",
           "name": "grok-3-mini",
           "context_window": 131072,
           "pricing": {
@@ -76,13 +84,15 @@
         }
       ],
       "base_url": "https://api.x.ai/v1",
-      "enabled": true
+      "enabled": true,
+      "default_model": "xai-2"
     },
     "openrouter": {
       "name": "OpenRouter",
       "api_key": "",
       "models": [
         {
+          "id": "openrouter-0",
           "name": "openai/gpt-4o",
           "context_window": 128000,
           "pricing": {
@@ -93,13 +103,15 @@
         }
       ],
       "base_url": "https://openrouter.ai/api/v1",
-      "enabled": true
+      "enabled": true,
+      "default_model": "openrouter-0"
     },
     "anthropic": {
       "name": "Anthropic",
       "api_key": "",
       "models": [
         {
+          "id": "anthropic-0",
           "name": "claude-opus-4-1-20250805",
           "context_window": 200000,
           "pricing": {
@@ -109,6 +121,7 @@
           }
         },
         {
+          "id": "anthropic-1",
           "name": "claude-opus-4",
           "context_window": 200000,
           "pricing": {
@@ -118,6 +131,7 @@
           }
         },
         {
+          "id": "anthropic-2",
           "name": "claude-sonnet-4",
           "context_window": 200000,
           "pricing": {
@@ -127,6 +141,7 @@
           }
         },
         {
+          "id": "anthropic-3",
           "name": "claude-sonnet-3.7",
           "context_window": 200000,
           "pricing": {
@@ -136,6 +151,7 @@
           }
         },
         {
+          "id": "anthropic-4",
           "name": "claude-sonnet-3.5",
           "context_window": 200000,
           "pricing": {
@@ -145,6 +161,7 @@
           }
         },
         {
+          "id": "anthropic-5",
           "name": "claude-haiku-3.5",
           "context_window": 200000,
           "pricing": {
@@ -154,6 +171,7 @@
           }
         },
         {
+          "id": "anthropic-6",
           "name": "claude-opus-3",
           "context_window": 200000,
           "pricing": {
@@ -163,6 +181,7 @@
           }
         },
         {
+          "id": "anthropic-7",
           "name": "claude-haiku-3",
           "context_window": 200000,
           "pricing": {
@@ -173,13 +192,15 @@
         }
       ],
       "base_url": "https://api.anthropic.com/v1",
-      "enabled": true
+      "enabled": true,
+      "default_model": "anthropic-0"
     },
     "local": {
       "name": "Local Model",
       "api_key": "",
       "models": [
         {
+          "id": "local-0",
           "name": "gpt-oss-120b",
           "context_window": 4096,
           "pricing": {
@@ -190,10 +211,11 @@
         }
       ],
       "base_url": "http://localhost:10003/v1",
-      "enabled": true
+      "enabled": true,
+      "default_model": "local-0"
     }
   },
-  "default_provider": "deepseek",
+  "default_provider": "xai",
   "server": {
     "host": "0.0.0.0",
     "port": 8000
@@ -203,5 +225,5 @@
     "file_path": "logs/proxy_logs.txt",
     "max_size": 10485760
   },
-  "language": "en"
+  "language": "ru"
 }

@@ -1,9 +1,11 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, messagebox
 import threading
 import requests
 import time
 import os
+import uuid
+import copy
 from server import app
 import uvicorn
 from config import config as Config
@@ -49,6 +51,11 @@ class ProxyGUI:
                 'providers_tab': 'Providers',
                 'logs_tab': 'Logs',
                 'language_tab': 'Language',
+                'server_tab': 'Server',
+                'host_label': 'Host:',
+                'port_label': 'Port:',
+                'default_model_label': 'Default Model:',
+                'default_provider_label': 'Default Provider:',
                 'cancel_button': 'Cancel',
                 'save_button': 'Save',
                 'enabled_checkbox': 'Enabled',
@@ -92,6 +99,11 @@ class ProxyGUI:
                 'providers_tab': 'Провайдеры',
                 'logs_tab': 'Логи',
                 'language_tab': 'Язык',
+                'server_tab': 'Сервер',
+                'host_label': 'Хост:',
+                'port_label': 'Порт:',
+                'default_model_label': 'Модель по умолчанию:',
+                'default_provider_label': 'Провайдер по умолчанию:',
                 'cancel_button': 'Отмена',
                 'save_button': 'Сохранить',
                 'enabled_checkbox': 'Включен',
@@ -135,6 +147,11 @@ class ProxyGUI:
                 'providers_tab': '提供商',
                 'logs_tab': '日志',
                 'language_tab': '语言',
+                'server_tab': '服务器',
+                'host_label': '主机：',
+                'port_label': '端口：',
+                'default_model_label': '默认模型：',
+                'default_provider_label': '默认提供商：',
                 'cancel_button': '取消',
                 'save_button': '保存',
                 'enabled_checkbox': '启用',
@@ -178,6 +195,11 @@ class ProxyGUI:
                 'providers_tab': 'Proveedores',
                 'logs_tab': 'Registros',
                 'language_tab': 'Idioma',
+                'server_tab': 'Servidor',
+                'host_label': 'Host:',
+                'port_label': 'Puerto:',
+                'default_model_label': 'Modelo por defecto:',
+                'default_provider_label': 'Proveedor por defecto:',
                 'cancel_button': 'Cancelar',
                 'save_button': 'Guardar',
                 'enabled_checkbox': 'Habilitado',
@@ -221,6 +243,11 @@ class ProxyGUI:
                 'providers_tab': 'प्रदाता',
                 'logs_tab': 'लॉग',
                 'language_tab': 'भाषा',
+                'server_tab': 'सर्वर',
+                'host_label': 'होस्ट:',
+                'port_label': 'पोर्ट:',
+                'default_model_label': 'डिफ़ॉल्ट मॉडल:',
+                'default_provider_label': 'डिफ़ॉल्ट प्रदाता:',
                 'cancel_button': 'रद्द करें',
                 'save_button': 'सहेजें',
                 'enabled_checkbox': 'सक्षम',
@@ -264,6 +291,11 @@ class ProxyGUI:
                 'providers_tab': 'المزودون',
                 'logs_tab': 'السجلات',
                 'language_tab': 'اللغة',
+                'server_tab': 'الخادم',
+                'host_label': 'المضيف:',
+                'port_label': 'المنفذ:',
+                'default_model_label': 'النموذج الافتراضي:',
+                'default_provider_label': 'المزود الافتراضي:',
                 'cancel_button': 'إلغاء',
                 'save_button': 'حفظ',
                 'enabled_checkbox': 'مفعل',
@@ -307,6 +339,11 @@ class ProxyGUI:
                 'providers_tab': 'প্রদানকারী',
                 'logs_tab': 'লগ',
                 'language_tab': 'ভাষা',
+                'server_tab': 'সার্ভার',
+                'host_label': 'হোস্ট:',
+                'port_label': 'পোর্ট:',
+                'default_model_label': 'ডিফল্ট মডেল:',
+                'default_provider_label': 'ডিফল্ট প্রদানকারী:',
                 'cancel_button': 'বাতিল করুন',
                 'save_button': 'সংরক্ষণ করুন',
                 'enabled_checkbox': 'সক্ষম',
@@ -350,6 +387,11 @@ class ProxyGUI:
                 'providers_tab': 'Provedores',
                 'logs_tab': 'Registros',
                 'language_tab': 'Idioma',
+                'server_tab': 'Servidor',
+                'host_label': 'Host:',
+                'port_label': 'Porta:',
+                'default_model_label': 'Modelo padrão:',
+                'default_provider_label': 'Provedor padrão:',
                 'cancel_button': 'Cancelar',
                 'save_button': 'Salvar',
                 'enabled_checkbox': 'Habilitado',
@@ -393,6 +435,11 @@ class ProxyGUI:
                 'providers_tab': 'プロバイダー',
                 'logs_tab': 'ログ',
                 'language_tab': '言語',
+                'server_tab': 'サーバー',
+                'host_label': 'ホスト:',
+                'port_label': 'ポート:',
+                'default_model_label': 'デフォルトモデル:',
+                'default_provider_label': 'デフォルトプロバイダー:',
                 'cancel_button': 'キャンセル',
                 'save_button': '保存',
                 'enabled_checkbox': '有効',
@@ -436,6 +483,11 @@ class ProxyGUI:
                 'providers_tab': 'Anbieter',
                 'logs_tab': 'Protokolle',
                 'language_tab': 'Sprache',
+                'server_tab': 'Server',
+                'host_label': 'Host:',
+                'port_label': 'Port:',
+                'default_model_label': 'Standardmodell:',
+                'default_provider_label': 'Standardanbieter:',
                 'cancel_button': 'Abbrechen',
                 'save_button': 'Speichern',
                 'enabled_checkbox': 'Aktiviert',
@@ -476,6 +528,9 @@ class ProxyGUI:
         self.logs_frame = None
         self.save_logs_checkbox = None
         self.notebook = None
+
+        # Словарь для хранения временных изменений моделей (инициализация при создании)
+        self.temp_models_changes = {}
 
         # Создание виджетов
         self.create_widgets()
@@ -605,6 +660,8 @@ class ProxyGUI:
         """Переключение языка интерфейса"""
         lang = self.current_language.get()
         # Сохраняем новый язык в settings.json
+        # Убеждаемся, что настройки загружены
+        Config.load_settings()
         Config._settings["language"] = lang
         Config.save_settings()
         self.update_ui_texts()
@@ -640,7 +697,9 @@ class ProxyGUI:
             self.settings_button.config(text=trans['settings_button'])
         server_config = Config.get_server_config()
         if self.port_label:
-            self.port_label.config(text=trans['port_label'].format(port=server_config.get("port", 8000)))
+            host = server_config.get("host", "0.0.0.0")
+            port = server_config.get("port", 8000)
+            self.port_label.config(text=f"Host: {host} | Port: {port}")
 
         # Обновляем статистику с текущими значениями
         if self.total_requests_label and self.total_tokens_label and self.total_cost_label:
@@ -917,8 +976,28 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
 
     def change_model(self, event):
         """Обработчик изменения модели"""
-        model = self.current_model.get()
-        print(f"Модель изменена на {model}")
+        model_name = self.current_model.get()
+        provider = self.current_provider.get()
+
+        # Сохраняем выбранную модель как модель по умолчанию для провайдера
+        if provider and model_name:
+            providers_config = Config.get_providers()
+            if provider in providers_config:
+                # Находим ID модели по её имени
+                models = providers_config[provider].get("models", [])
+                model_dict = {model.get("name", "Unknown"): model for model in models}
+                if model_name in model_dict:
+                    model_data = model_dict[model_name]
+                    # Используем id если он есть, иначе используем имя как id
+                    model_id = model_data.get("id", model_name)
+                    providers_config[provider]["default_model"] = model_id
+                    # Сохраняем изменения в файл
+                    Config.save_settings()
+                    print(f"Модель {model_name} (ID: {model_id}) установлена по умолчанию для провайдера {provider}")
+                else:
+                    print(f"Модель {model_name} не найдена в списке моделей провайдера {provider}")
+
+        print(f"Модель изменена на {model_name}")
 
     def open_settings(self):
         """Открытие окна настроек"""
@@ -937,6 +1016,17 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         settings_window.grab_set()
         settings_window.focus_set()
 
+        # Принудительно перезагружаем настройки из файла
+        Config._settings = None
+        Config.load_settings()
+
+        # Сохраняем копию старых настроек
+        self.old_settings = copy.deepcopy(Config._settings)
+        self.settings_saved = False
+        
+        # Словарь для хранения временных изменений моделей
+        self.temp_models_changes = {}
+
         # Устанавливаем флаг
         self.settings_window_open = True
 
@@ -946,6 +1036,10 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         # Создаем notebook для вкладок настроек
         notebook = ttk.Notebook(settings_window)
         notebook.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Вкладка сервера
+        server_frame = self.create_server_tab(notebook, trans)
+        notebook.add(server_frame, text=trans['server_tab'])
 
         # Вкладка провайдеров
         providers_frame = self.create_providers_tab(notebook, trans)
@@ -983,12 +1077,37 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
 
+        # Добавляем прокрутку колесиком мыши
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+        def _bind_to_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _unbind_from_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>")
+
+        canvas.bind('<Enter>', _bind_to_mousewheel)
+        canvas.bind('<Leave>', _unbind_from_mousewheel)
+
         # Получаем настройки провайдеров
         providers_config = Config.get_providers()
 
         self.provider_widgets = {}  # Для хранения виджетов
 
-        row = 0
+        # Поле выбора провайдера по умолчанию
+        default_provider_frame = ttk.LabelFrame(scrollable_frame, text="Global Settings")
+        default_provider_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        default_provider_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(default_provider_frame, text=trans['default_provider_label']).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        available_providers = list(providers_config.keys())
+        self.default_provider_var = tk.StringVar(value=Config.get_default_provider())
+        default_provider_combo = ttk.Combobox(default_provider_frame, textvariable=self.default_provider_var,
+                                            values=available_providers, state="readonly")
+        default_provider_combo.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+
+        row = 1
         for provider_name, provider_config in providers_config.items():
             # Фрейм для провайдера
             provider_frame = ttk.LabelFrame(scrollable_frame, text=provider_config.get("name", provider_name))
@@ -999,30 +1118,63 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
             enabled_var = tk.BooleanVar(value=provider_config.get("enabled", False))
             ttk.Checkbutton(provider_frame, text=trans['enabled_checkbox'], variable=enabled_var).grid(row=0, column=0, padx=5, pady=2)
 
+            # Название провайдера
+            ttk.Label(provider_frame, text="Name:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
+            name_var = tk.StringVar(value=provider_config.get("name", provider_name))
+            name_entry = ttk.Entry(provider_frame, textvariable=name_var)
+            name_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+
             # API ключ
-            ttk.Label(provider_frame, text=trans['api_key_label']).grid(row=1, column=0, sticky="w", padx=5, pady=2)
+            ttk.Label(provider_frame, text=trans['api_key_label']).grid(row=2, column=0, sticky="w", padx=5, pady=2)
             api_key_var = tk.StringVar(value=provider_config.get("api_key", ""))
             api_entry = ttk.Entry(provider_frame, textvariable=api_key_var, show="*")
-            api_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+            api_entry.grid(row=2, column=1, sticky="ew", padx=5, pady=2)
+
+            # Base URL
+            ttk.Label(provider_frame, text="Base URL:").grid(row=3, column=0, sticky="w", padx=5, pady=2)
+            base_url_var = tk.StringVar(value=provider_config.get("base_url", ""))
+            base_url_entry = ttk.Entry(provider_frame, textvariable=base_url_var)
+            base_url_entry.grid(row=3, column=1, sticky="ew", padx=5, pady=2)
 
             # Модели
-            ttk.Label(provider_frame, text=trans['models_label']).grid(row=2, column=0, sticky="w", padx=5, pady=2)
+            ttk.Label(provider_frame, text=trans['models_label']).grid(row=4, column=0, sticky="w", padx=5, pady=2)
             models_text = tk.Text(provider_frame, height=3, width=50)
-            models_text.grid(row=2, column=1, sticky="ew", padx=5, pady=2)
+            models_text.grid(row=4, column=1, sticky="ew", padx=5, pady=2)
+
+            # Кнопка редактирования моделей
+            edit_models_button = ttk.Button(provider_frame, text="Edit Models",
+                                          command=lambda p=provider_name: self.open_models_editor(p))
+            edit_models_button.grid(row=4, column=2, padx=5, pady=2)
 
             # Заполняем модели
             models = provider_config.get("models", [])
             models_content = ""
             for model in models:
-                models_content += f"{model['name']} (context: {model['context_window']})\n"
+                models_content += f"{model.get('name', 'Unknown')} (context: {model.get('context_window', 'N/A')})\n"
             models_text.insert("1.0", models_content.strip())
             models_text.config(state="disabled")
+
+            # Модель по умолчанию
+            ttk.Label(provider_frame, text=trans['default_model_label']).grid(row=5, column=0, sticky="w", padx=5, pady=2)
+            default_model_id = provider_config.get("default_model", "")
+            model_dict = {model.get("id", model.get("name", "Unknown")): model for model in models}
+            if default_model_id in model_dict:
+                default_model_name = model_dict[default_model_id].get("name", "Unknown")
+            else:
+                default_model_name = models[0].get("name", "Unknown") if models else ""
+            default_model_var = tk.StringVar(value=default_model_name)
+            default_model_combo = ttk.Combobox(provider_frame, textvariable=default_model_var, values=[model.get("name", "Unknown") for model in models])
+            default_model_combo.grid(row=5, column=1, sticky="ew", padx=5, pady=2)
 
             # Сохраняем виджеты
             self.provider_widgets[provider_name] = {
                 "enabled": enabled_var,
+                "name": name_var,
                 "api_key": api_key_var,
-                "models_text": models_text
+                "base_url": base_url_var,
+                "models_text": models_text,
+                "default_model": default_model_var,
+                "default_model_combo": default_model_combo
             }
 
             row += 1
@@ -1076,15 +1228,79 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
 
         return frame
 
+    def create_server_tab(self, parent, trans):
+        """Создание вкладки сервера"""
+        frame = ttk.Frame(parent)
+
+        server_config = Config.get_server_config()
+
+        # Host
+        ttk.Label(frame, text=trans['host_label']).grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.server_host_var = tk.StringVar(value=server_config.get("host", "0.0.0.0"))
+        ttk.Entry(frame, textvariable=self.server_host_var, width=15).grid(row=0, column=1, sticky="w", padx=10, pady=5)
+
+        # Port
+        ttk.Label(frame, text=trans['port_label']).grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        self.server_port_var = tk.StringVar(value=str(server_config.get("port", 8000)))
+        ttk.Entry(frame, textvariable=self.server_port_var, width=15).grid(row=1, column=1, sticky="w", padx=10, pady=5)
+
+        # Настройка растяжения столбцов
+        frame.columnconfigure(1, weight=1)
+
+        return frame
+
     def save_settings(self, window):
         """Сохранение настроек"""
+        # Сохраняем настройки сервера
+        if hasattr(self, 'server_host_var') and hasattr(self, 'server_port_var'):
+            server_config = Config.get_server_config()
+            server_config["host"] = self.server_host_var.get()
+            try:
+                server_config["port"] = int(self.server_port_var.get())
+            except ValueError:
+                server_config["port"] = 8000
+
         # Сохраняем настройки провайдеров
         if hasattr(self, 'provider_widgets'):
             providers_config = Config.get_providers()
             for provider_name, widgets in self.provider_widgets.items():
                 if provider_name in providers_config:
                     providers_config[provider_name]["enabled"] = widgets["enabled"].get()
+                    providers_config[provider_name]["name"] = widgets["name"].get()
                     providers_config[provider_name]["api_key"] = widgets["api_key"].get()
+                    providers_config[provider_name]["base_url"] = widgets["base_url"].get()
+                    
+                    # Применяем изменения моделей из временного хранилища, если они есть
+                    if provider_name in self.temp_models_changes:
+                        providers_config[provider_name]["models"] = self.temp_models_changes[provider_name]["models"]
+                        # Восстанавливаем модель по умолчанию из временного хранилища
+                        providers_config[provider_name]["default_model"] = self.temp_models_changes[provider_name]["default_model"]
+                    
+                    # Обновляем модель по умолчанию из выпадающего списка
+                    default_model_value = widgets["default_model"].get()
+                    if default_model_value:
+                        # Используем модели из временного хранилища, если они есть
+                        if provider_name in self.temp_models_changes:
+                            models = self.temp_models_changes[provider_name]["models"]
+                        else:
+                            models = providers_config[provider_name].get("models", [])
+                        model_dict = {model.get("name", "Unknown"): model for model in models}
+                        if default_model_value in model_dict:
+                            model_data = model_dict[default_model_value]
+                            # Используем id если он есть, иначе используем имя как id
+                            model_id = model_data.get("id", default_model_value)
+                            providers_config[provider_name]["default_model"] = model_id
+                        else:
+                            providers_config[provider_name]["default_model"] = ""
+
+        # Сохраняем провайдера по умолчанию
+        if hasattr(self, 'default_provider_var'):
+            # Убеждаемся, что настройки загружены
+            Config.load_settings()
+            if Config._settings is not None:
+                Config._settings["default_provider"] = self.default_provider_var.get()
+            else:
+                print("Ошибка: настройки не загружены")
 
         # Сохраняем настройки логов
         if hasattr(self, 'save_logs_var'):
@@ -1096,14 +1312,24 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
             except ValueError:
                 logging_config["max_size"] = 10485760
 
+            # Применяем изменения логирования сразу
+            self.save_logs_to_file.set(self.save_logs_var.get())
+            print(f"Настройки логирования обновлены: save_to_file={self.save_logs_var.get()}")
+
         # Сохраняем язык
         if hasattr(self, 'settings_lang_var'):
             new_lang = self.settings_lang_var.get()
-            Config._settings["language"] = new_lang
-            self.current_language.set(new_lang)  # Обновляем текущий язык
-            self.change_language()  # Применяем изменения языка
+            # Убеждаемся, что настройки загружены
+            Config.load_settings()
+            if Config._settings is not None:
+                Config._settings["language"] = new_lang
+                self.current_language.set(new_lang)  # Обновляем текущий язык
+                self.change_language()  # Применяем изменения языка
+            else:
+                print("Ошибка: настройки не загружены")
 
         Config.save_settings()
+        self.settings_saved = True
         self.settings_window_open = False
         window.destroy()
         print("Настройки сохранены")
@@ -1112,22 +1338,376 @@ uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
         self.update_available_providers()
         self.update_models_list()
 
+        # Обновляем отображение провайдеров в комбобоксе (имена могли измениться)
+        if hasattr(self, 'provider_combo') and self.provider_combo:
+            providers_config = Config.get_providers()
+            available_providers = [config.get("name", name) for name, config in providers_config.items() if config.get("enabled", False)]
+            current_provider_name = providers_config.get(self.current_provider.get(), {}).get("name", self.current_provider.get())
+            self.provider_combo['values'] = available_providers
+            # Обновляем отображаемое имя текущего провайдера
+            if current_provider_name in available_providers:
+                self.provider_combo.set(current_provider_name)
+
+        # Обновляем текущего провайдера по умолчанию в главном интерфейсе
+        if hasattr(self, 'default_provider_var'):
+            new_default_provider = self.default_provider_var.get()
+            if new_default_provider != self.current_provider.get():
+                self.current_provider.set(new_default_provider)
+                self.update_models_list()
+                print(f"Провайдер по умолчанию изменен на: {new_default_provider}")
+
+        # Обновляем модель по умолчанию для текущего провайдера
+        current_provider = self.current_provider.get()
+        if current_provider:
+            # Просто обновляем список моделей, сохраняя текущий выбор если возможно
+            self.update_models_list()
+            print(f"Список моделей для {current_provider} обновлен")
+
     def on_settings_close(self, window):
         """Обработчик закрытия окна настроек"""
+        if not self.settings_saved:
+            # Восстанавливаем настройки из файла
+            Config._settings = None
+            Config.load_settings()
+            print("Настройки отменены, восстановлены настройки из файла")
+            
+            # Очищаем временные изменения моделей
+            self.temp_models_changes = {}
+            
+            # Принудительно обновляем список провайдеров и моделей
+            self.update_available_providers()
+            self.update_models_list()
+        else:
+            # Если настройки были сохранены, очищаем временные изменения
+            self.temp_models_changes = {}
+            
         self.settings_window_open = False
         window.destroy()
+
+    def open_models_editor(self, provider_name):
+        """Открытие редактора моделей для провайдера"""
+        # Получаем текущие модели провайдера
+        providers_config = Config.get_providers()
+        provider_config = providers_config.get(provider_name, {})
+        
+        # Используем временные изменения, если они есть, иначе берем из конфигурации
+        if provider_name in self.temp_models_changes:
+            models = self.temp_models_changes[provider_name]["models"]
+            current_default_id = self.temp_models_changes[provider_name]["default_model"]
+        else:
+            models = provider_config.get("models", [])
+            current_default_id = provider_config.get("default_model", "")
+
+        # Сохраняем текущий id модели по умолчанию
+        self.current_default_id = current_default_id
+        # Сохраняем старый список моделей
+        self.old_models = models[:]
+
+        # Создаем окно редактора
+        editor_window = tk.Toplevel(self.root)
+        editor_window.title(f"Edit Models - {provider_config.get('name', provider_name)}")
+        editor_window.geometry("800x600")
+
+        # Делаем окно модальным
+        editor_window.grab_set()
+        editor_window.focus_set()
+
+        # Основной фрейм
+        main_frame = ttk.Frame(editor_window)
+        main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Список моделей
+        listbox_frame = ttk.Frame(main_frame)
+        listbox_frame.pack(fill="both", expand=True, pady=(0, 10))
+
+        # Создаем Treeview для отображения моделей
+        columns = ("name", "context_window", "input_cache_hit", "input_cache_miss", "output")
+        tree = ttk.Treeview(listbox_frame, columns=columns, show="headings", height=10)
+
+        # Заголовки столбцов
+        tree.heading("name", text="Model Name")
+        tree.heading("context_window", text="Context Window")
+        tree.heading("input_cache_hit", text="Input Cache Hit")
+        tree.heading("input_cache_miss", text="Input Cache Miss")
+        tree.heading("output", text="Output Price")
+
+        # Ширина столбцов
+        tree.column("name", width=200)
+        tree.column("context_window", width=120)
+        tree.column("input_cache_hit", width=120)
+        tree.column("input_cache_miss", width=120)
+        tree.column("output", width=120)
+
+        # Полоса прокрутки
+        scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Добавляем обработчик двойного клика для редактирования модели
+        tree.bind("<Double-1>", lambda event: self.edit_model(tree))
+
+        # Заполняем список моделями
+        for model in models:
+            pricing = model.get("pricing", {})
+            model_id = model.get("id", model.get("name", "Unknown"))
+            tree.insert("", "end", values=(
+                model.get("name", ""),
+                model.get("context_window", ""),
+                pricing.get("input_cache_hit", ""),
+                pricing.get("input_cache_miss", ""),
+                pricing.get("output", "")
+            ), tags=(model_id,))
+
+        # Кнопки управления
+        buttons_frame = ttk.Frame(main_frame)
+        buttons_frame.pack(fill="x", pady=(0, 10))
+
+        ttk.Button(buttons_frame, text="+ Add Model",
+                  command=lambda: self.add_model(tree)).pack(side="left", padx=(0, 5))
+        ttk.Button(buttons_frame, text="- Remove Model",
+                  command=lambda: self.remove_model(tree)).pack(side="left", padx=(0, 5))
+        ttk.Button(buttons_frame, text="Edit Model",
+                  command=lambda: self.edit_model(tree)).pack(side="left", padx=(0, 5))
+
+        # Кнопки внизу
+        bottom_frame = ttk.Frame(editor_window)
+        bottom_frame.pack(fill="x", padx=10, pady=5)
+
+        ttk.Button(bottom_frame, text="Save",
+                  command=lambda: self.save_models(tree, provider_name, editor_window)).pack(side="right", padx=(5, 0))
+        ttk.Button(bottom_frame, text="Cancel",
+                  command=editor_window.destroy).pack(side="right")
+
+    def add_model(self, tree):
+        """Добавление новой модели"""
+        # Создаем диалог для ввода данных модели
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Add Model")
+        dialog.geometry("400x300")
+        dialog.grab_set()
+
+        # Поля ввода
+        ttk.Label(dialog, text="Model Name:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        name_var = tk.StringVar()
+        ttk.Entry(dialog, textvariable=name_var).grid(row=0, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Context Window:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        context_var = tk.StringVar()
+        ttk.Entry(dialog, textvariable=context_var).grid(row=1, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Input Cache Hit:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        input_hit_var = tk.StringVar()
+        ttk.Entry(dialog, textvariable=input_hit_var).grid(row=2, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Input Cache Miss:").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        input_miss_var = tk.StringVar()
+        ttk.Entry(dialog, textvariable=input_miss_var).grid(row=3, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Output Price:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+        output_var = tk.StringVar()
+        ttk.Entry(dialog, textvariable=output_var).grid(row=4, column=1, sticky="ew", padx=10, pady=5)
+
+        dialog.columnconfigure(1, weight=1)
+
+        def save_new_model():
+            try:
+                new_id = str(uuid.uuid4())
+                tree.insert("", "end", values=(
+                    name_var.get(),
+                    int(context_var.get()) if context_var.get() else 0,
+                    float(input_hit_var.get()) if input_hit_var.get() else 0.0,
+                    float(input_miss_var.get()) if input_miss_var.get() else 0.0,
+                    float(output_var.get()) if output_var.get() else 0.0
+                ), tags=(new_id,))
+                dialog.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid numeric values")
+
+        ttk.Button(dialog, text="Add", command=save_new_model).grid(row=5, column=0, columnspan=2, pady=10)
+
+    def remove_model(self, tree):
+        """Удаление выбранной модели"""
+        selected_item = tree.selection()
+        if selected_item:
+            tree.delete(selected_item)
+        else:
+            messagebox.showwarning("Warning", "Please select a model to remove")
+
+    def edit_model(self, tree):
+        """Редактирование выбранной модели"""
+        selected_item = tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Warning", "Please select a model to edit")
+            return
+
+        # Получаем данные выбранной модели
+        values = tree.item(selected_item, "values")
+
+        # Создаем диалог редактирования
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Edit Model")
+        dialog.geometry("400x300")
+        dialog.grab_set()
+
+        # Поля ввода с текущими значениями
+        ttk.Label(dialog, text="Model Name:").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        name_var = tk.StringVar(value=values[0])
+        ttk.Entry(dialog, textvariable=name_var).grid(row=0, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Context Window:").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        context_var = tk.StringVar(value=values[1])
+        ttk.Entry(dialog, textvariable=context_var).grid(row=1, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Input Cache Hit:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        input_hit_var = tk.StringVar(value=values[2])
+        ttk.Entry(dialog, textvariable=input_hit_var).grid(row=2, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Input Cache Miss:").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        input_miss_var = tk.StringVar(value=values[3])
+        ttk.Entry(dialog, textvariable=input_miss_var).grid(row=3, column=1, sticky="ew", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Output Price:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+        output_var = tk.StringVar(value=values[4])
+        ttk.Entry(dialog, textvariable=output_var).grid(row=4, column=1, sticky="ew", padx=10, pady=5)
+
+        dialog.columnconfigure(1, weight=1)
+
+        def save_edited_model():
+            try:
+                tree.item(selected_item, values=(
+                    name_var.get(),
+                    int(context_var.get()) if context_var.get() else 0,
+                    float(input_hit_var.get()) if input_hit_var.get() else 0.0,
+                    float(input_miss_var.get()) if input_miss_var.get() else 0.0,
+                    float(output_var.get()) if output_var.get() else 0.0
+                ))
+                dialog.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid numeric values")
+
+        ttk.Button(dialog, text="Save", command=save_edited_model).grid(row=5, column=0, columnspan=2, pady=10)
+
+    def save_models(self, tree, provider_name, editor_window):
+        """Сохранение моделей во временное хранилище"""
+        # Получаем все модели из Treeview
+        models = []
+        for item in tree.get_children():
+            values = tree.item(item, "values")
+            # Проверяем, есть ли id в tag или values
+            item_tags = tree.item(item, "tags")
+            model_id = item_tags[0] if item_tags else str(uuid.uuid4())
+            model = {
+                "id": model_id,
+                "name": values[0],
+                "context_window": int(values[1]) if values[1] else 0,
+                "pricing": {
+                    "input_cache_hit": float(values[2]) if values[2] else 0.0,
+                    "input_cache_miss": float(values[3]) if values[3] else 0.0,
+                    "output": float(values[4]) if values[4] else 0.0
+                }
+            }
+            models.append(model)
+
+        # Сохраняем во временное хранилище вместо немедленного сохранения в конфигурацию
+        self.temp_models_changes[provider_name] = {
+            "models": models,
+            "default_model": self.current_default_id
+        }
+
+        # Обновляем отображение моделей в главном окне настроек
+        if hasattr(self, 'provider_widgets') and provider_name in self.provider_widgets:
+            models_text = self.provider_widgets[provider_name]["models_text"]
+            models_text.config(state="normal")
+            models_text.delete("1.0", tk.END)
+            models_content = ""
+            for model in models:
+                models_content += f"{model.get('name', 'Unknown')} (context: {model.get('context_window', 'N/A')})\n"
+            models_text.insert("1.0", models_content.strip())
+            models_text.config(state="disabled")
+
+            # Обновляем список моделей по умолчанию
+            if "default_model_combo" in self.provider_widgets[provider_name]:
+                default_model_combo = self.provider_widgets[provider_name]["default_model_combo"]
+                model_names = [model.get("name", "Unknown") for model in models]
+                print(f"Новые модели: {model_names}")
+                default_model_combo['values'] = model_names
+
+                # Используем сохраненный id модели по умолчанию
+                if hasattr(self, 'current_default_id') and self.current_default_id:
+                    # Создаем словарь моделей с безопасным доступом к id
+                    model_dict = {}
+                    for model in models:
+                        # Используем id если он есть, иначе используем имя как id
+                        model_id = model.get("id", model.get("name", "Unknown"))
+                        model_dict[model_id] = model
+                        
+                    if self.current_default_id in model_dict:
+                        default_model_name = model_dict[self.current_default_id]["name"]
+                        default_model_combo.set(default_model_name)
+                        print(f"Восстановлена модель по умолчанию по id {self.current_default_id}: {default_model_name}")
+                    else:
+                        # Если id не найден, оставляем пустым
+                        default_model_combo.set("")
+                        print(f"Id модели по умолчанию не найден, установлено пустое значение")
+                else:
+                    # Если id пустой, оставляем пустым
+                    default_model_combo.set("")
+                    print(f"Id модели по умолчанию пустой, установлено пустое значение")
+
+        editor_window.destroy()
 
     def update_models_list(self):
         """Обновление списка моделей для текущего провайдера"""
         provider = self.current_provider.get()
         if provider:
-            provider_config = Config.get_provider_config(provider)
-            models = provider_config.get("models", [])
-            model_names = [model["name"] for model in models]
+            # Используем временные изменения моделей, если они есть
+            if provider in self.temp_models_changes:
+                models = self.temp_models_changes[provider]["models"]
+            else:
+                provider_config = Config.get_provider_config(provider)
+                models = provider_config.get("models", [])
+                
+            model_names = [model.get("name", "Unknown") for model in models]
             if hasattr(self, 'model_combo'):
                 self.model_combo['values'] = model_names
                 if model_names:
-                    self.current_model.set(model_names[0])
+                    current_model = self.current_model.get()
+                    # Если текущая выбранная модель существует в новом списке, оставляем ее
+                    if current_model and current_model in model_names:
+                        # Модель все еще доступна, оставляем текущий выбор
+                        pass
+                    else:
+                        # Модель больше не доступна, устанавливаем модель по умолчанию
+                        # Используем временные изменения для получения default_model_id
+                        if provider in self.temp_models_changes:
+                            default_model_id = self.temp_models_changes[provider]["default_model"]
+                        else:
+                            provider_config = Config.get_provider_config(provider)
+                            default_model_id = provider_config.get("default_model", "")
+                            
+                        # Создаем словарь моделей с безопасным доступом к id
+                        model_dict = {}
+                        for model in models:
+                            # Используем id если он есть, иначе используем имя как id
+                            model_id = model.get("id", model.get("name", "Unknown"))
+                            model_dict[model_id] = model
+                            
+                        if default_model_id in model_dict:
+                            self.current_model.set(model_dict[default_model_id]["name"])
+                        else:
+                            # Если модель по умолчанию не найдена или пустая, берем первую из списка
+                            if model_names:
+                                self.current_model.set(model_names[0])
+                                # Обновляем конфигурацию на id первой модели только если нет временных изменений
+                                if models and provider not in self.temp_models_changes:
+                                    provider_config = Config.get_provider_config(provider)
+                                    # Используем id если он есть, иначе используем имя как id
+                                    first_model_id = models[0].get("id", models[0].get("name", "Unknown"))
+                                    provider_config["default_model"] = first_model_id
+                                    # Сохраняем изменения в файл
+                                    Config.save_settings()
 
     def update_available_providers(self):
         """Обновление списка доступных провайдеров"""

@@ -13,7 +13,7 @@ class OpenRouterProvider:
         )
         # Получаем первую модель из настроек
         models = provider_config.get("models", [])
-        self.model = models[0]["name"] if models else "openai/gpt-4o"
+        self.model = models[0].get("name", "openai/gpt-4o") if models else "openai/gpt-4o"
 
     async def chat_completion(self, messages, **kwargs):
         # Filter out unsupported parameters for OpenRouter
