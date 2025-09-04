@@ -55,6 +55,27 @@ Open the GUI and go to settings (⚙ button). For each provider:
 2. Specify the API key
 3. Select a model from the available list
 
+### Settings System and Model Editing
+
+#### Model Editor
+
+- Double-click on a model in the list to open the editor
+- Supports adding, deleting, and editing models
+- Each model automatically receives a unique UUID ID
+- Changes are saved to temporary storage until confirmed
+
+#### Settings Save Mechanism
+
+- **Save**: Settings are applied only after clicking the "Save" button
+- **Cancel**: When closing the window without saving, original settings are restored from file
+- **Temporary Storage**: Model changes are stored in `temp_models_changes` until confirmed
+
+#### Safe Configuration Access
+
+- All settings access is protected from KeyError and TypeError errors
+- Automatic settings loading before accessing configuration
+- Settings backup when opening the editor
+
 ### Supported Providers
 
 | Provider   | Models                           | Features                        |
@@ -167,6 +188,9 @@ For extensions with OpenAI API support:
 - **Statistics:** Detailed usage and cost tracking
 - **Localizations:** Support for 10 interface languages
 - **Compatibility:** OpenAI-compatible API for maximum compatibility
+- **Safe Settings Management:** Protection against configuration errors
+- **Temporary Change Storage:** Changes applied only after confirmation
+- **Automatic Recovery:** Canceling changes restores original settings
 
 ## Development
 
