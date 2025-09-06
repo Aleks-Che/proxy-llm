@@ -83,12 +83,21 @@
       "api_key": "",
       "models": [
         {
-          "name": "openai/gpt-4o",
-          "context_window": 128000,
+          "name": "deepseek/deepseek-chat-v3.1:free",
+          "context_window": 64000,
           "pricing": {
-            "input_cache_hit": 0.0,
-            "input_cache_miss": 0.0,
-            "output": 0.0
+            "input_cache_hit": 0,
+            "input_cache_miss": 0,
+            "output": 0
+          }
+        },
+        {
+          "name": "anthropic/claude-sonnet-4",
+          "context_window": 200000,
+          "pricing": {
+            "input_cache_hit": 3.0,
+            "input_cache_miss": 3.0,
+            "output": 15.0
           }
         }
       ],
