@@ -13,9 +13,9 @@ class OpenRouterProvider:
         self.api_key = provider_config.get("api_key", "")
         self.base_url = provider_config.get("base_url", "https://openrouter.ai/api/v1")
         self.default_headers = {
-            "HTTP-Referer": "https://github.com/RooVetGit/Roo-Code",
-            "X-Title": "Roo Code",
-            "User-Agent": "RooCode/1.0.0"
+            "HTTP-Referer": "https://github.com/Aleks-Che/proxy-llm",
+            "X-Title": "proxy-llm",
+            "User-Agent": "proxy-llm/1.0.0"
         }
         self.client = AsyncOpenAI(
             api_key=self.api_key,
@@ -50,9 +50,8 @@ class OpenRouterProvider:
         ]
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
 
-        # Добавляем stream_options если stream=True
-        if filtered_kwargs.get('stream', False):
-            filtered_kwargs['stream_options'] = {'include_usage': True}
+        # Убираем stream_options, так как OpenAI клиент версии 1.3.0 не поддерживает его
+        # Вместо этого будем рассчитывать usage на стороне сервера
 
         try:
             response = await self.client.chat.completions.create(

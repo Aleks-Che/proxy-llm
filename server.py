@@ -308,7 +308,8 @@ async def chat_completions(request: ChatCompletionRequest):
                         }
                     
                     # Обновляем completion_tokens во всех чанках
-                    if request.stream_options and request.stream_options.get("include_usage", False):
+                    # Для OpenRouter не добавляем usage в каждый chunk из-за ограничений API
+                    if request.stream_options and request.stream_options.get("include_usage", False) and current_provider != "openrouter":
                         chunk_dict["usage"] = {
                             "prompt_tokens": input_tokens,
                             "completion_tokens": completion_tokens,
@@ -328,7 +329,8 @@ async def chat_completions(request: ChatCompletionRequest):
                         yield f"data: {{\"error\": \"JSON serialization failed\"}}\n\n"
                 
                 # Финальный chunk с полной статистикой usage
-                if request.stream_options and request.stream_options.get("include_usage", False):
+                # Для OpenRouter не добавляем финальный usage chunk из-за ограничений API
+                if request.stream_options and request.stream_options.get("include_usage", False) and current_provider != "openrouter":
                     final_chunk = {
                         "id": f"chatcmpl-{int(time.time())}",
                         "object": "chat.completion.chunk",
