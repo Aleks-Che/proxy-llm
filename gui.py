@@ -587,6 +587,10 @@ class ProxyGUI:
 
     def change_provider(self, event):
         provider = self.current_provider.get()
+        # Сохраняем выбранный провайдер как дефолтный
+        Config._settings["default_provider"] = provider
+        Config.save_settings()
+
         # Обновляем список моделей для нового провайдера
         self.update_models_list()
 
