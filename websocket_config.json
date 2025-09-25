@@ -1,0 +1,23 @@
+{
+  "websocket_bridge": {
+    "host": "0.0.0.0",
+    "port": 8765,
+    "local_proxy_url": "http://localhost:8000",
+    "reconnect_interval": 5,
+    "max_reconnect_attempts": 10,
+    "connection_timeout": 30,
+    "heartbeat_interval": 15
+  },
+  "client": {
+    "ws_url": "ws://localhost:8765",
+    "reconnect_interval": 5000,
+    "max_reconnect_attempts": 10,
+    "connection_timeout": 30000,
+    "heartbeat_interval": 15000
+  },
+  "network": {
+    "keepalive_interval": 30,
+    "retry_delay": 10,
+    "max_retries": 5
+  }
+}
