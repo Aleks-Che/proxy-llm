@@ -77,6 +77,10 @@ for provider_name, provider_config in provider_configs.items():
             from providers.anthropic import AnthropicProvider
             providers["anthropic"] = AnthropicProvider()
             logger.info("Anthropic provider initialized")
+        elif provider_name == "gigachat" and api_key:
+            from providers.gigachat import GigaChatProvider
+            providers["gigachat"] = GigaChatProvider()
+            logger.info("GigaChat provider initialized")
 
 current_provider = Config.get_default_provider() if Config.get_default_provider() in providers else "local"
 token_counter = TokenCounter()

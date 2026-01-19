@@ -184,6 +184,41 @@
       "base_url": "https://api.anthropic.com/v1",
       "enabled": true
     },
+    "gigachat": {
+      "name": "GigaChat",
+      "api_key": "",
+      "models": [
+        {
+          "name": "GigaChat",
+          "context_window": 8192,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        },
+        {
+          "name": "GigaChat-Pro",
+          "context_window": 8192,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        },
+        {
+          "name": "GigaChat-2-Max",
+          "context_window": 131072,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        }
+      ],
+      "base_url": "https://gigachat.devices.sberbank.ru/api/v1",
+      "enabled": true
+    },
     "local": {
       "name": "Local Model",
       "api_key": "",
