@@ -14,3 +14,5 @@ proxy_llm/settings.json
 __pycache__/
 
 logs/
+
+node_modules/
