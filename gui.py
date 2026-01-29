@@ -708,16 +708,9 @@ class ProxyGUI:
         import os
 
         try:
-            # Запускаем сервер в отдельном процессе
+            # Запускаем сервер через run_server.py
             server_config = Config.get_server_config()
-            cmd = [sys.executable, "-c", f"""
-import sys
-sys.path.insert(0, r"{os.getcwd()}")
-import uvicorn
-from server import app
-from config import config as Config
-uvicorn.run(app, host="{server_config['host']}", port={server_config['port']})
-"""]
+            cmd = [sys.executable, "run_server.py"]
 
             self.server_process = subprocess.Popen(cmd, cwd=os.getcwd())
 

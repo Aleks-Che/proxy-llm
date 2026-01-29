@@ -67,7 +67,7 @@ def run_server():
     
     logger.info(f"Сервер будет запущен на {host}:{port}")
     logger.info(f"Доступен по адресу: http://localhost:{port}")
-    logger.info("Для остановки нажмите Ctrl+C")
+    logger.info("Для остановки нажмите Ctrl+C или отправьте SIGTERM")
     
     try:
         import uvicorn
@@ -82,6 +82,16 @@ def run_server():
             lifespan="on"
         )
         server = uvicorn.Server(config)
+        
+        # Устанавливаем обработчик сигналов для graceful shutdown
+        import signal
+        
+        def handle_signal(signum, frame):
+            logger.info(f"Получен сигнал {signum}, останавливаю сервер...")
+            server.should_exit = True
+            
+        signal.signal(signal.SIGTERM, handle_signal)
+        signal.signal(signal.SIGINT, handle_signal)
         
         # Запуск сервера
         asyncio.run(server.serve())
