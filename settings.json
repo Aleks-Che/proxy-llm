@@ -7,6 +7,17 @@
         {
           "name": "deepseek-chat",
           "context_window": 128000,
+          "max_tokens": 8096,
+          "pricing": {
+            "input_cache_hit": 0.07,
+            "input_cache_miss": 0.56,
+            "output": 1.68
+          }
+        },
+        {
+          "name": "deepseek-reasoner",
+          "context_window": 128000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 0.07,
             "input_cache_miss": 0.56,
@@ -22,8 +33,19 @@
       "api_key": "",
       "models": [
         {
-          "name": "kimi-k2-0711-preview",
-          "context_window": 128000,
+          "name": "kimi-k2.5",
+          "context_window": 262144,
+          "max_tokens": 32768,
+          "pricing": {
+            "input_cache_hit": 0.1,
+            "input_cache_miss": 0.6,
+            "output": 3
+          }
+        },
+        {
+          "name": "kimi-k2-0905-preview",
+          "context_window": 262144,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.15,
             "input_cache_miss": 0.6,
@@ -41,6 +63,7 @@
         {
           "name": "grok-code-fast-1",
           "context_window": 256000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 0.2,
             "input_cache_miss": 0.2,
@@ -50,6 +73,7 @@
         {
           "name": "grok-4-0709",
           "context_window": 256000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -59,6 +83,7 @@
         {
           "name": "grok-3",
           "context_window": 131072,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -68,6 +93,7 @@
         {
           "name": "grok-3-mini",
           "context_window": 131072,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.3,
             "input_cache_miss": 0.3,
@@ -85,6 +111,7 @@
         {
           "name": "deepseek/deepseek-chat-v3.1:free",
           "context_window": 64000,
+          "max_tokens": 16384,
           "pricing": {
             "input_cache_hit": 0,
             "input_cache_miss": 0,
@@ -94,6 +121,7 @@
         {
           "name": "anthropic/claude-sonnet-4",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -111,6 +139,7 @@
         {
           "name": "claude-opus-4-1-20250805",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 15.0,
             "input_cache_miss": 15.0,
@@ -120,6 +149,7 @@
         {
           "name": "claude-opus-4",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 15.0,
             "input_cache_miss": 15.0,
@@ -129,6 +159,7 @@
         {
           "name": "claude-sonnet-4",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -138,6 +169,7 @@
         {
           "name": "claude-sonnet-3.7",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -147,6 +179,7 @@
         {
           "name": "claude-sonnet-3.5",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 3.0,
             "input_cache_miss": 3.0,
@@ -156,6 +189,7 @@
         {
           "name": "claude-haiku-3.5",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 0.8,
             "input_cache_miss": 0.8,
@@ -165,6 +199,7 @@
         {
           "name": "claude-opus-3",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 15.0,
             "input_cache_miss": 15.0,
@@ -174,6 +209,7 @@
         {
           "name": "claude-haiku-3",
           "context_window": 200000,
+          "max_tokens": 65536,
           "pricing": {
             "input_cache_hit": 0.25,
             "input_cache_miss": 0.25,
@@ -190,7 +226,8 @@
       "models": [
         {
           "name": "GigaChat",
-          "context_window": 8192,
+          "context_window": 128000,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.0,
             "input_cache_miss": 0.0,
@@ -199,7 +236,8 @@
         },
         {
           "name": "GigaChat-Pro",
-          "context_window": 8192,
+          "context_window": 128000,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.0,
             "input_cache_miss": 0.0,
@@ -208,7 +246,8 @@
         },
         {
           "name": "GigaChat-2-Max",
-          "context_window": 131072,
+          "context_window": 128000,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.0,
             "input_cache_miss": 0.0,
@@ -225,7 +264,8 @@
       "models": [
         {
           "name": "gpt-oss-120b",
-          "context_window": 4096,
+          "context_window": 131072,
+          "max_tokens": 32768,
           "pricing": {
             "input_cache_hit": 0.0,
             "input_cache_miss": 0.0,
@@ -235,15 +275,34 @@
       ],
       "base_url": "http://localhost:10003/v1",
       "enabled": true
+    },
+    "minimax": {
+      "name": "MiniMax",
+      "api_key": "",
+      "models": [
+        {
+          "name": "MiniMax-M2.5",
+          "context_window": 192000,
+          "max_tokens": 32768,
+          "pricing": {
+            "input_cache_hit": 0.0,
+            "input_cache_miss": 0.0,
+            "output": 0.0
+          }
+        }
+      ],
+      "base_url": "https://api.minimax.io/anthropic",
+      "type": "anthropic",
+      "enabled": true
     }
   },
-  "default_provider": "deepseek",
+  "default_provider": "minimax",
   "server": {
     "host": "0.0.0.0",
-    "port": 8000
+    "port": 10003
   },
   "logging": {
-    "save_to_file": true,
+    "save_to_file": false,
     "file_path": "logs/proxy_logs.txt",
     "max_size": 10485760
   },

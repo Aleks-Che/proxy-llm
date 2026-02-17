@@ -34,6 +34,12 @@ class Config:
                     "models": [{"name": "gpt-oss-120b", "context_window": 128000, "pricing": {"input_cache_hit": 0.0, "input_cache_miss": 0.0, "output": 0.0}}],
                     "base_url": "http://localhost:10003/v1",
                     "enabled": True
+                },
+                "minimax": {
+                    "api_key": "",
+                    "models": [{"name": "MiniMax-M2.1", "context_window": 192000, "pricing": {"input_cache_hit": 0.0, "input_cache_miss": 0.0, "output": 0.0}}],
+                    "base_url": "https://api.minimax.chat/v1",
+                    "enabled": True
                 }
             },
             "default_provider": "local",
@@ -79,7 +85,37 @@ class Config:
         cls.load_settings()
         return cls._settings.get("language", "en")
 
+    @classmethod
+    def get_max_tokens(cls) -> int:
+        cls.load_settings()
+        return cls._settings.get("max_tokens", 8000)
+
+    @classmethod
+    def get_model_max_tokens(cls, provider_name: str, model_name: str = None) -> int:
+        """
+        Получить max_tokens для конкретной модели.
+        Если model_name не указан, возвращает max_tokens первой модели провайдера.
+        """
+        cls.load_settings()
+        provider_config = cls.get_provider_config(provider_name)
+        models = provider_config.get("models", [])
+        
+        if not models:
+            return cls.get_max_tokens()
+        
+        if model_name:
+            for model in models:
+                if model.get("name") == model_name:
+                    return model.get("max_tokens", cls.get_max_tokens())
+        
+        # Если модель не найдена, возвращаем max_tokens первой модели
+        return models[0].get("max_tokens", cls.get_max_tokens())
+
     # Legacy properties for backward compatibility
+    @property
+    def MAX_TOKENS(self):
+        return self.get_max_tokens()
+
     @property
     def DEEPSEEK_API_KEY(self):
         return self.get_provider_config("deepseek").get("api_key", "")
@@ -87,6 +123,10 @@ class Config:
     @property
     def MOONSHOT_API_KEY(self):
         return self.get_provider_config("moonshot").get("api_key", "")
+
+    @property
+    def MINIMAX_API_KEY(self):
+        return self.get_provider_config("minimax").get("api_key", "")
 
     @property
     def DEEPSEEK_MODEL(self):
@@ -97,6 +137,11 @@ class Config:
     def MOONSHOT_MODEL(self):
         models = self.get_provider_config("moonshot").get("models", [])
         return models[0]["name"] if models else "kimi-k2-0711-preview"
+
+    @property
+    def MINIMAX_MODEL(self):
+        models = self.get_provider_config("minimax").get("models", [])
+        return models[0]["name"] if models else "MiniMax-M2.1"
 
     @property
     def LOCAL_MODEL(self):

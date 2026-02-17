@@ -81,6 +81,10 @@ for provider_name, provider_config in provider_configs.items():
             from providers.gigachat import GigaChatProvider
             providers["gigachat"] = GigaChatProvider()
             logger.info("GigaChat provider initialized")
+        elif provider_name == "minimax" and api_key:
+            from providers.minimax import MiniMaxProvider
+            providers["minimax"] = MiniMaxProvider()
+            logger.info("MiniMax provider initialized")
 
 current_provider = Config.get_default_provider() if Config.get_default_provider() in providers else "local"
 token_counter = TokenCounter()
@@ -195,6 +199,11 @@ async def chat_completions(request: ChatCompletionRequest):
         provider = providers[current_provider]
         logger.info(f"Using provider: {current_provider}")
         
+        # Определяем тип провайдера (openai или anthropic)
+        provider_config = Config.get_provider_config(current_provider)
+        provider_type = provider_config.get("type", "openai")
+        logger.info(f"Provider type: {provider_type}")
+        
         # Обработка сообщений - более гибкая
         messages = []
         if request.messages:
@@ -236,7 +245,7 @@ async def chat_completions(request: ChatCompletionRequest):
         logger.info(f"Processed messages count: {len(messages)}")
         
         # Параметры
-        kwargs = {"max_tokens": 1000}
+        kwargs = {"max_tokens": Config.get_model_max_tokens(current_provider)}
         if request.max_tokens:
             kwargs["max_tokens"] = request.max_tokens
         if request.temperature is not None:
@@ -392,7 +401,44 @@ async def chat_completions(request: ChatCompletionRequest):
             )
         
         logger.info("Response received successfully")
-        output_text = response.choices[0].message.content
+        
+        # Извлекаем контент из ответа в зависимости от типа провайдера
+        if provider_type == "anthropic":
+            # Для провайдеров Anthropic (MiniMax) response может быть объектом с атрибутами или словарем
+            if hasattr(response, 'choices'):
+                choices = response.choices
+                if isinstance(choices, list) and len(choices) > 0:
+                    choice = choices[0]
+                    if hasattr(choice, 'message'):
+                        message = choice.message
+                        if hasattr(message, 'content'):
+                            output_text = message.content
+                        else:
+                            output_text = str(message)
+                    elif isinstance(choice, dict):
+                        output_text = choice.get('message', {}).get('content', '')
+                    else:
+                        output_text = str(choice)
+                else:
+                    output_text = ''
+            elif isinstance(response, dict):
+                # Если response - словарь (например, после model_dump)
+                choices = response.get('choices', [])
+                if choices and isinstance(choices, list):
+                    choice = choices[0]
+                    if isinstance(choice, dict):
+                        output_text = choice.get('message', {}).get('content', '')
+                    else:
+                        output_text = str(choice)
+                else:
+                    output_text = ''
+            else:
+                output_text = ''
+        else:
+            # Для провайдеров OpenAI (стандартный путь)
+            output_text = response.choices[0].message.content
+        
+        logger.info(f"Extracted output text length: {len(output_text)}")
         
         # Подсчет токенов
         input_tokens = token_counter.count_tokens(str(messages), current_provider)
