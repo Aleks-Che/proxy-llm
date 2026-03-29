@@ -68,6 +68,13 @@ class MiniMaxProvider:
         
         # Handle streaming
         stream = filtered_kwargs.pop('stream', False)
+        
+        # Автоматически включаем стриминг для больших max_tokens (чтобы избежать ошибки Anthropic SDK)
+        max_tokens = filtered_kwargs.get('max_tokens', 4096)
+        if max_tokens > 100000 and not stream:
+            stream = True
+            print(f"Auto-enabling streaming for large max_tokens ({max_tokens})")
+        
         if stream:
             # Return an async generator for streaming
             return self._stream_response(system, anthropic_messages, filtered_kwargs)

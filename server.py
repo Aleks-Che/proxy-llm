@@ -250,7 +250,20 @@ async def chat_completions(request: ChatCompletionRequest):
             kwargs["max_tokens"] = request.max_tokens
         if request.temperature is not None:
             kwargs["temperature"] = request.temperature
-        if request.stream:
+        
+        # Автоматически включаем стриминг для больших max_tokens (чтобы избежать ошибки Anthropic SDK)
+        # Для провайдеров Anthropic и совместимых (minimax) стриминг требуется для запросов > 100000 токенов
+        max_tokens_value = kwargs.get("max_tokens", 4096)
+        provider_config = Config.get_provider_config(current_provider)
+        provider_type = provider_config.get("type", "openai")
+        
+        # Проверяем, нужно ли автоматически включить стриминг
+        auto_stream = False
+        if provider_type == "anthropic" and max_tokens_value > 100000:
+            auto_stream = True
+            logger.info(f"Auto-enabling streaming for large max_tokens ({max_tokens_value}) with Anthropic provider")
+        
+        if request.stream or auto_stream:
             kwargs["stream"] = True
             
         logger.info(f"Calling provider with {len(messages)} messages and kwargs: {kwargs}")
@@ -262,8 +275,12 @@ async def chat_completions(request: ChatCompletionRequest):
         )
         
         # Обработка streaming response
-        if request.stream:
-            logger.info("Streaming response requested")
+        stream_enabled = kwargs.get("stream", False)
+        if stream_enabled:
+            if request.stream:
+                logger.info("Streaming response requested")
+            else:
+                logger.info("Streaming auto-enabled for large request")
             logger.info(f"Stream options: {request.stream_options}")
             logger.info(f"Reasoning effort: {request.reasoning_effort}")
             
