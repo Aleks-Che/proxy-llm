@@ -281,7 +281,7 @@
       "api_key": "",
       "models": [
         {
-          "name": "MiniMax-M2.5",
+          "name": "MiniMax-M2.7",
           "context_window": 192000,
           "max_tokens": 32768,
           "pricing": {
