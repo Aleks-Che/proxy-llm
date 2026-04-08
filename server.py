@@ -73,10 +73,6 @@ for provider_name, provider_config in provider_configs.items():
             from providers.openrouter import OpenRouterProvider
             providers["openrouter"] = OpenRouterProvider()
             logger.info("OpenRouter provider initialized")
-        elif provider_name == "anthropic" and api_key:
-            from providers.anthropic import AnthropicProvider
-            providers["anthropic"] = AnthropicProvider()
-            logger.info("Anthropic provider initialized")
         elif provider_name == "gigachat" and api_key:
             from providers.gigachat import GigaChatProvider
             providers["gigachat"] = GigaChatProvider()
