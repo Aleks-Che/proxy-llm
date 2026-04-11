@@ -200,19 +200,24 @@ async def chat_completions(request: ChatCompletionRequest):
         provider_type = provider_config.get("type", "openai")
         logger.info(f"Provider type: {provider_type}")
         
-        # Обработка сообщений - более гибкая
+        # Обработка сообщений - сохраняем все поля для поддержки инструментов
         messages = []
         if request.messages:
             logger.info(f"Raw messages: {request.messages}")
             for i, msg in enumerate(request.messages):
                 logger.info(f"Message {i}: role={msg.role}, content_type={type(msg.content)}")
                 
+                # Создаем базовое сообщение со всеми полями из исходного сообщения
+                message_dict = {
+                    "role": msg.role,
+                }
+                
                 # Обрабатываем content в зависимости от типа
                 content = msg.content
                 
                 # Если content - строка
                 if isinstance(content, str):
-                    processed_content = content
+                    message_dict["content"] = content
                 # Если content - список (мультимодальные данные)
                 elif isinstance(content, list):
                     text_parts = []
@@ -223,20 +228,27 @@ async def chat_completions(request: ChatCompletionRequest):
                             # Игнорируем image_url и другие типы для простоты
                         elif isinstance(item, str):
                             text_parts.append(item)
-                    processed_content = " ".join(text_parts)
+                    message_dict["content"] = " ".join(text_parts)
                 # Если content - dict
                 elif isinstance(content, dict):
-                    processed_content = str(content)  # Или извлечь текст из dict
+                    message_dict["content"] = str(content)  # Или извлечь текст из dict
                 # Для других типов
                 else:
-                    processed_content = str(content)
+                    message_dict["content"] = str(content)
                 
-                messages.append({
-                    "role": msg.role,
-                    "content": processed_content
-                })
+                # Сохраняем дополнительные поля, важные для инструментов
+                if hasattr(msg, 'tool_calls') and msg.tool_calls is not None:
+                    message_dict["tool_calls"] = msg.tool_calls
                 
-                logger.info(f"Processed message {i}: {processed_content[:100]}...")
+                if hasattr(msg, 'tool_call_id') and msg.tool_call_id is not None:
+                    message_dict["tool_call_id"] = msg.tool_call_id
+                
+                if hasattr(msg, 'name') and msg.name is not None:
+                    message_dict["name"] = msg.name
+                
+                messages.append(message_dict)
+                
+                logger.info(f"Processed message {i}: role={msg.role}, has_tool_calls={'tool_calls' in message_dict}, has_tool_call_id={'tool_call_id' in message_dict}")
         
         logger.info(f"Processed messages count: {len(messages)}")
         
@@ -246,6 +258,12 @@ async def chat_completions(request: ChatCompletionRequest):
             kwargs["max_tokens"] = request.max_tokens
         if request.temperature is not None:
             kwargs["temperature"] = request.temperature
+        
+        # Передаем инструменты, если они есть
+        if request.tools is not None:
+            kwargs["tools"] = request.tools
+        if request.tool_choice is not None:
+            kwargs["tool_choice"] = request.tool_choice
         
         # Автоматически включаем стриминг для больших max_tokens (чтобы избежать ошибки Anthropic SDK)
         # Для провайдеров Anthropic и совместимых (minimax) стриминг требуется для запросов > 100000 токенов

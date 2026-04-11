@@ -44,7 +44,7 @@ class MiniMaxProvider:
             messages = messages[1:]
         
         # Filter out unsupported parameters for MiniMax (OpenAI-compatible)
-        supported_params = ['temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'thinking']
+        supported_params = ['temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'thinking', 'tools', 'tool_choice']
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
         
         # Handle streaming

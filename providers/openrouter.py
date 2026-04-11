@@ -46,7 +46,8 @@ class OpenRouterProvider:
         # Поддерживаемые параметры для OpenRouter
         supported_params = [
             'temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty',
-            'presence_penalty', 'stop', 'transforms', 'provider', 'reasoning'
+            'presence_penalty', 'stop', 'transforms', 'provider', 'reasoning',
+            'tools', 'tool_choice'
         ]
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
 

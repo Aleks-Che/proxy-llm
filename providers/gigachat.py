@@ -149,7 +149,8 @@ class GigaChatProvider:
             # Поддерживаемые параметры для GigaChat
             supported_params = [
                 'temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty',
-                'presence_penalty', 'stop', 'n', 'repetition_penalty', 'update_interval'
+                'presence_penalty', 'stop', 'n', 'repetition_penalty', 'update_interval',
+                'tools', 'tool_choice'
             ]
             filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
 

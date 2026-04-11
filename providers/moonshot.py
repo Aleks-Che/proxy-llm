@@ -16,7 +16,7 @@ class MoonshotProvider:
 
     async def chat_completion(self, messages, **kwargs):
         # Filter out unsupported parameters for Moonshot
-        supported_params = ['temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop']
+        supported_params = ['temperature', 'max_tokens', 'stream', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'tools', 'tool_choice']
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_params and v is not None}
 
         # Убираем None значения, которые могут вызвать ошибку by_alias
